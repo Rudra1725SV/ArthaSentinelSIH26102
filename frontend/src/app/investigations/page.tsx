@@ -64,7 +64,7 @@ export default function InvestigationsPage() {
         </div>
 
         {/* Filters Row in Inter */}
-        <div className="flex flex-wrap items-center gap-3 bg-white border border-slate-200 p-3 sm:p-4 rounded-2xl shadow-2xs">
+        <div className="flex flex-wrap items-center gap-3 border-b border-slate-200 pb-4">
           <div className="relative flex-1 min-w-[240px]">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" strokeWidth="2">
               <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
@@ -74,107 +74,111 @@ export default function InvestigationsPage() {
               placeholder="Search by Work ID, description, constituency..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 font-sans text-sm bg-white border border-slate-200 rounded-xl focus:outline-hidden focus:ring-2 focus:ring-blue-600"
+              className="w-full pl-10 pr-4 py-2 font-sans text-xs sm:text-sm bg-white border border-slate-300 rounded-lg focus:outline-hidden focus:ring-1 focus:ring-blue-600 focus:border-blue-600"
             />
           </div>
           <select
             value={riskFilter}
             onChange={(e) => setRiskFilter(e.target.value)}
-            className="bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 font-sans text-xs sm:text-sm font-semibold text-slate-700"
+            className="bg-white border border-slate-300 rounded-lg px-3 py-2 font-sans text-xs sm:text-sm font-medium text-slate-700 focus:outline-hidden focus:ring-1 focus:ring-blue-600"
           >
             {RISK_TIERS.map((t) => <option key={t} value={t}>{t === "ALL" ? "All Risk Tiers" : `${t} Risk`}</option>)}
           </select>
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 font-sans text-xs sm:text-sm font-semibold text-slate-700"
+            className="bg-white border border-slate-300 rounded-lg px-3 py-2 font-sans text-xs sm:text-sm font-medium text-slate-700 focus:outline-hidden focus:ring-1 focus:ring-blue-600"
           >
             {STATUSES.map((s) => <option key={s} value={s}>{s === "ALL" ? "All Case Statuses" : s}</option>)}
           </select>
           <select
             value={anomalyFilter}
             onChange={(e) => setAnomalyFilter(e.target.value)}
-            className="bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 font-sans text-xs sm:text-sm font-semibold text-slate-700"
+            className="bg-white border border-slate-300 rounded-lg px-3 py-2 font-sans text-xs sm:text-sm font-medium text-slate-700 focus:outline-hidden focus:ring-1 focus:ring-blue-600"
           >
-            <option value="ALL">All Anomaly Types</option>
-            <option value="cost">Cost Variance</option>
-            <option value="semantic">Semantic Overlap</option>
-            <option value="geographic">Geographic</option>
-            <option value="pattern">Pattern</option>
+            <option value="ALL">All Anomaly Signals</option>
+            <option value="cost">Cost Variance (MAD/Z-Score)</option>
+            <option value="semantic">Semantic Overlap (NLP)</option>
+            <option value="geographic">Constituency &amp; Vendor Clustering</option>
+            <option value="pattern">Temporal &amp; Category Pattern</option>
           </select>
         </div>
 
         <div className="flex items-center justify-between text-xs font-data text-slate-500">
-          <span>{filtered.length} flagged cases matching filters</span>
-          <span>Sorted by {sortField === "riskScore" ? "Risk Score" : "Sanction Cost"} ({sortDir.toUpperCase()})</span>
+          <span>{filtered.length} priority cases under scrutiny</span>
+          <span>Sorted by {sortField === "riskScore" ? "Composite Risk" : "Sanction Cost"} ({sortDir.toUpperCase()})</span>
         </div>
 
         {/* Table using Roboto (font-data) for dense data */}
-        <div className="rounded-2xl border border-slate-200 bg-white shadow-2xs overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left font-data text-sm">
-              <thead className="bg-[#F8F7F2] border-b border-slate-200 text-xs font-sans font-bold text-slate-700 uppercase tracking-wider">
-                <tr>
-                  <th className="py-4 pl-6 pr-3 cursor-pointer select-none" onClick={() => toggleSort("riskScore")}>
-                    Risk {sortField === "riskScore" && (sortDir === "desc" ? "↓" : "↑")}
-                  </th>
-                  <th className="px-3 py-4">Work ID</th>
-                  <th className="px-3 py-4">Description</th>
-                  <th className="px-3 py-4">Location</th>
-                  <th className="px-3 py-4 cursor-pointer select-none" onClick={() => toggleSort("sanctionedAmount")}>
-                    Cost {sortField === "sanctionedAmount" && (sortDir === "desc" ? "↓" : "↑")}
-                  </th>
-                  <th className="px-3 py-4">Primary Signal</th>
-                  <th className="px-3 py-4">Status</th>
-                  <th className="px-3 py-4 pr-6">Assigned To</th>
+        <div className="overflow-x-auto border-t border-b border-slate-200">
+          <table className="w-full text-left font-data text-sm">
+            <thead className="border-b border-slate-200 text-[11px] font-emphasis font-bold text-slate-500 uppercase tracking-wider">
+              <tr>
+                <th className="py-3 px-3 cursor-pointer select-none" onClick={() => toggleSort("riskScore")}>
+                  Risk {sortField === "riskScore" && (sortDir === "desc" ? "↓" : "↑")}
+                </th>
+                <th className="px-3 py-3">Work ID</th>
+                <th className="px-3 py-3">Description</th>
+                <th className="px-3 py-3">Constituency &amp; Location</th>
+                <th className="px-3 py-3 cursor-pointer select-none text-right" onClick={() => toggleSort("sanctionedAmount")}>
+                  Cost {sortField === "sanctionedAmount" && (sortDir === "desc" ? "↓" : "↑")}
+                </th>
+                <th className="px-3 py-3">Primary Scrutiny Signal</th>
+                <th className="px-3 py-3">Review Status</th>
+                <th className="px-3 py-3 text-right">Action</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100 font-data">
+              {filtered.length === 0 ? (
+                <tr><td colSpan={8} className="py-12 text-center text-sm font-sans text-slate-500">No cases matching criteria.</td></tr>
+              ) : filtered.map((inv) => (
+                <tr key={inv.investigationId} className="hover:bg-slate-50/80 transition-colors">
+                  <td className="py-3.5 px-3 font-sans">
+                    <RiskBadge score={inv.riskScore} tier={getRiskTier(inv.riskScore)} />
+                  </td>
+                  <td className="px-3 py-3.5">
+                    <Link href={`/investigations/${inv.workId}`} className="font-bold text-blue-700 hover:underline">
+                      {inv.workId}
+                    </Link>
+                  </td>
+                  <td className="px-3 py-3.5 max-w-sm">
+                    <Link href={`/investigations/${inv.workId}`} className="font-sans font-medium text-slate-900 hover:text-blue-700 line-clamp-1">
+                      {inv.work.description}
+                    </Link>
+                    <div className="font-sans text-xs text-slate-400 line-clamp-1">{inv.work.category}</div>
+                  </td>
+                  <td className="px-3 py-3.5 text-xs text-slate-700">
+                    <div className="font-medium text-slate-900">{inv.work.constituency}</div>
+                    <div className="text-slate-400">{inv.work.district}, {inv.work.state}</div>
+                  </td>
+                  <td className="px-3 py-3.5 text-xs font-bold text-slate-900 whitespace-nowrap text-right">
+                    {formatCurrency(inv.work.sanctionedAmount)}
+                  </td>
+                  <td className="px-3 py-3.5 text-xs text-orange-700 font-medium max-w-[240px]">
+                    <div className="line-clamp-2">{inv.primarySignal}</div>
+                  </td>
+                  <td className="px-3 py-3.5 font-sans">
+                    <span className={`inline-flex px-2 py-0.5 rounded text-[11px] font-semibold border ${
+                      inv.status === "Flagged" ? "bg-red-50 text-red-800 border-red-200" :
+                      inv.status === "Escalated" ? "bg-orange-50 text-orange-800 border-orange-200" :
+                      inv.status === "Under Review" ? "bg-blue-50 text-blue-800 border-blue-200" :
+                      inv.status === "Triaged" ? "bg-amber-50 text-amber-800 border-amber-200" :
+                      inv.status === "Resolved" ? "bg-emerald-50 text-emerald-800 border-emerald-200" :
+                      "bg-slate-100 text-slate-600 border-slate-200"
+                    }`}>{inv.status}</span>
+                  </td>
+                  <td className="px-3 py-3.5 text-right font-sans">
+                    <Link
+                      href={`/investigations/${inv.workId}`}
+                      className="inline-flex items-center text-xs font-semibold text-blue-700 hover:text-blue-900 hover:underline"
+                    >
+                      Dossier →
+                    </Link>
+                  </td>
                 </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-200 font-data">
-                {filtered.length === 0 ? (
-                  <tr><td colSpan={8} className="py-12 text-center text-sm font-sans text-slate-500">No cases matching criteria.</td></tr>
-                ) : filtered.map((inv) => (
-                  <tr key={inv.investigationId} className="hover:bg-slate-50/80 transition-colors">
-                    <td className="py-4 pl-6 pr-3 font-sans">
-                      <RiskBadge score={inv.riskScore} tier={getRiskTier(inv.riskScore)} />
-                    </td>
-                    <td className="px-3 py-4">
-                      <Link href={`/investigations/${inv.workId}`} className="font-bold text-blue-800 hover:underline">
-                        {inv.workId}
-                      </Link>
-                    </td>
-                    <td className="px-3 py-4 max-w-sm">
-                      <Link href={`/investigations/${inv.workId}`} className="font-sans font-semibold text-slate-900 hover:text-blue-700 line-clamp-1">
-                        {inv.work.description}
-                      </Link>
-                    </td>
-                    <td className="px-3 py-4 text-xs text-slate-700">
-                      <div>{inv.work.constituency}</div>
-                      <div className="text-slate-400">{inv.work.district}, {inv.work.state}</div>
-                    </td>
-                    <td className="px-3 py-4 text-xs font-bold text-slate-900 whitespace-nowrap">
-                      {formatCurrency(inv.work.sanctionedAmount)}
-                    </td>
-                    <td className="px-3 py-4 text-xs text-orange-700 font-semibold max-w-[220px] line-clamp-2">
-                      {inv.primarySignal}
-                    </td>
-                    <td className="px-3 py-4 font-sans">
-                      <span className={`inline-flex px-2.5 py-1 rounded-md text-[11px] font-bold border ${
-                        inv.status === "Flagged" ? "bg-red-50 text-red-800 border-red-200" :
-                        inv.status === "Escalated" ? "bg-orange-50 text-orange-800 border-orange-200" :
-                        inv.status === "Under Review" ? "bg-blue-50 text-blue-800 border-blue-200" :
-                        inv.status === "Triaged" ? "bg-amber-50 text-amber-800 border-amber-200" :
-                        inv.status === "Resolved" ? "bg-emerald-50 text-emerald-800 border-emerald-200" :
-                        "bg-slate-100 text-slate-600 border-slate-200"
-                      }`}>{inv.status}</span>
-                    </td>
-                    <td className="px-3 py-4 pr-6 text-xs text-slate-600">
-                      {inv.assignedTo}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
     </DashboardLayout>

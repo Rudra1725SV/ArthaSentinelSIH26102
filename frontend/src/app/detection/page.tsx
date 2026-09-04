@@ -48,12 +48,12 @@ export default function DetectionPage() {
 
         {/* ═══════════ PIPELINE FLOW ═══════════ */}
         <div className="space-y-4">
-          <h2 className="font-heading text-xl font-bold text-slate-950">Processing Stages</h2>
+          <h2 className="font-heading text-xl font-bold text-slate-950">Scrutiny Pipeline Stages</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {pipelineSteps.map((step) => (
-              <div key={step.num} className="p-5 rounded-xl border border-slate-200 bg-white shadow-2xs space-y-2">
+              <div key={step.num} className="border-l-2 border-slate-300 pl-4 py-1 space-y-1 hover:border-blue-600 transition-colors">
                 <span className="font-emphasis text-xs font-extrabold text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-200 inline-block">
-                  {step.num}
+                  STAGE {step.num}
                 </span>
                 <div className="font-heading text-sm font-bold text-slate-900">{step.name}</div>
                 <div className="font-sans text-xs text-slate-600 leading-relaxed">{step.desc}</div>
@@ -63,10 +63,10 @@ export default function DetectionPage() {
         </div>
 
         {/* ═══════════ INTERACTIVE SIGNAL DRILLDOWN ═══════════ */}
-        <div className="space-y-6">
+        <div className="space-y-6 pt-6 border-t border-slate-200">
           <div className="flex items-center justify-between">
             <h2 className="font-heading text-xl font-bold text-slate-950">Core Detection Signals</h2>
-            <span className="font-sans text-xs text-slate-500">Select a signal to view its formal specification</span>
+            <span className="font-sans text-xs text-slate-500">Select a signal to view mathematical specification</span>
           </div>
 
           <div className="flex flex-wrap gap-2">

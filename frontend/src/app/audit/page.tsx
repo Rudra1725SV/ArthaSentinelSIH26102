@@ -39,7 +39,7 @@ export default function AuditTrailPage() {
         </div>
 
         {/* Filters in Inter */}
-        <div className="flex flex-wrap items-center gap-3 bg-white border border-slate-200 p-3 sm:p-4 rounded-2xl shadow-2xs">
+        <div className="flex flex-wrap items-center gap-3 border-b border-slate-200 pb-4">
           <div className="relative flex-1 min-w-[240px]">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" strokeWidth="2">
               <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
@@ -49,13 +49,13 @@ export default function AuditTrailPage() {
               placeholder="Search by work ID, action, actor, or outcome..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 font-sans text-sm bg-white border border-slate-200 rounded-xl focus:outline-hidden focus:ring-2 focus:ring-blue-600"
+              className="w-full pl-10 pr-4 py-2 font-sans text-xs sm:text-sm bg-white border border-slate-300 rounded-lg focus:outline-hidden focus:ring-1 focus:ring-blue-600 focus:border-blue-600"
             />
           </div>
           <select
             value={actorFilter}
             onChange={(e) => setActorFilter(e.target.value)}
-            className="bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 font-sans text-xs sm:text-sm font-semibold text-slate-700"
+            className="bg-white border border-slate-300 rounded-lg px-3 py-2 font-sans text-xs sm:text-sm font-medium text-slate-700 focus:outline-hidden focus:ring-1 focus:ring-blue-600"
           >
             <option value="ALL">All Actors</option>
             <option value="system">System (AI Engine)</option>
@@ -66,16 +66,16 @@ export default function AuditTrailPage() {
 
         <div className="text-xs font-data text-slate-500">{filteredEvents.length} recorded events matching query</div>
 
-        {/* Chronological Timeline */}
-        <div className="rounded-2xl border border-slate-200 bg-white p-6 sm:p-8 shadow-2xs space-y-6">
+        {/* Chronological Timeline - De-boxed */}
+        <div className="pt-2 pl-2">
           <div className="space-y-0">
             {filteredEvents.map((evt, idx) => {
               const targetWorkId = evt.object.startsWith("INV-") ? undefined : evt.object.split(" ")[0];
 
               return (
-                <div key={evt.id || idx} className="flex gap-4 py-4 border-l-2 border-slate-200 pl-6 ml-3 relative group hover:border-blue-400 transition-colors">
+                <div key={evt.id || idx} className="flex gap-4 py-4 border-l-2 border-slate-200 pl-6 ml-2 relative group hover:border-blue-400 transition-colors">
                   {/* Dot */}
-                  <div className={`absolute -left-[9px] top-[22px] w-4 h-4 rounded-full border-2 transition-transform group-hover:scale-125 ${
+                  <div className={`absolute -left-[9px] top-[20px] w-4 h-4 rounded-full border-2 transition-transform group-hover:scale-125 ${
                     evt.actorType === "system" ? "bg-blue-100 border-blue-600" :
                     evt.actorType === "supervisor" ? "bg-orange-100 border-orange-600" :
                     "bg-emerald-100 border-emerald-600"
@@ -83,7 +83,7 @@ export default function AuditTrailPage() {
 
                   <div className="flex-1 space-y-1">
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="font-sans text-sm font-bold text-slate-900">{evt.action}</span>
+                      <span className="font-heading text-sm font-bold text-slate-900">{evt.action}</span>
                       <span className="text-slate-300">·</span>
                       {targetWorkId ? (
                         <Link href={`/investigations/${targetWorkId}`} className="font-data text-xs font-bold text-blue-700 hover:underline">
@@ -104,7 +104,7 @@ export default function AuditTrailPage() {
                     <p className="font-sans text-xs sm:text-sm text-slate-600 leading-relaxed">{evt.result}</p>
 
                     <div className="font-data text-[11px] text-slate-400 pt-1" suppressHydrationWarning>
-                      <span>{evt.actor}</span>
+                      <span className="font-medium text-slate-600">{evt.actor}</span>
                       <span className="mx-2">·</span>
                       <span>{formatTimestamp(evt.timestamp)}</span>
                     </div>

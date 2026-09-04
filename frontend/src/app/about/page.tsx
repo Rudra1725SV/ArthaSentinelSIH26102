@@ -49,61 +49,69 @@ export default function AboutPage() {
         </div>
 
         {/* Methodology Sections */}
-        <div className="space-y-10 divide-y divide-slate-200">
+        <div className="space-y-12 divide-y divide-slate-200">
           {/* 1. Statistical Peer Baselines */}
           <section className="pt-8 space-y-4">
             <div className="flex items-center gap-2">
-              <span className="font-emphasis text-xs font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-200">MODULE 01</span>
+              <span className="font-emphasis text-xs font-bold text-blue-700 bg-blue-50 px-2.5 py-0.5 rounded border border-blue-200">MODULE 01</span>
               <h2 className="font-heading text-xl sm:text-2xl font-bold text-slate-900">Statistical Peer Baseline Computation</h2>
             </div>
-            <p className="font-sans text-sm sm:text-base text-slate-600 leading-relaxed">
-              MPLADS works cannot be evaluated with blanket national caps because local market rates, state PWD Schedules of Rates (SoR), and geographical accessibility vary widely. ArthaSentinel constructs localized peer cohorts dynamically:
+            <p className="font-sans text-sm sm:text-base text-slate-600 leading-relaxed max-w-4xl">
+              MPLADS works cannot be evaluated with blanket national caps because local market rates, state PWD Schedules of Rates (SoR), and material transport logistics vary widely. ArthaSentinel dynamically constructs localized peer cohorts to establish defensible benchmarks:
             </p>
-            <ul className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs sm:text-sm font-sans text-slate-700">
-              <li className="p-5 rounded-xl bg-white border border-slate-200 shadow-2xs space-y-1">
-                <strong className="block text-slate-900 font-heading text-base">Cohort Stratification</strong>
-                Projects are stratified by work category, financial year, administrative district, and topographical zone.
-              </li>
-              <li className="p-5 rounded-xl bg-white border border-slate-200 shadow-2xs space-y-1">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2 text-xs sm:text-sm font-sans text-slate-700">
+              <div className="border-l-2 border-blue-600 pl-4 space-y-1.5">
+                <strong className="block text-slate-900 font-heading text-base">Multivariate Cohort Stratification</strong>
+                <p className="text-slate-600 leading-relaxed">
+                  Projects are stratified by work category, financial year, administrative district, implementing agency classification, and project scale tier.
+                </p>
+              </div>
+              <div className="border-l-2 border-blue-600 pl-4 space-y-1.5">
                 <strong className="block text-slate-900 font-heading text-base">Robust Non-Parametric Estimators</strong>
-                Instead of mean and standard deviation (which are skewed by severe outliers), the engine calculates Median and Median Absolute Deviation (MAD) with Interquartile Range (IQR) bounding.
-              </li>
-            </ul>
+                <p className="text-slate-600 leading-relaxed">
+                  Instead of standard deviations (which are heavily distorted by extreme outliers), the engine calculates Median and Median Absolute Deviation (MAD) with Interquartile Range (IQR) bounding.
+                </p>
+              </div>
+            </div>
           </section>
 
           {/* 2. Semantic NLP */}
           <section className="pt-8 space-y-4">
             <div className="flex items-center gap-2">
-              <span className="font-emphasis text-xs font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-200">MODULE 02</span>
+              <span className="font-emphasis text-xs font-bold text-indigo-700 bg-indigo-50 px-2.5 py-0.5 rounded border border-indigo-200">MODULE 02</span>
               <h2 className="font-heading text-xl sm:text-2xl font-bold text-slate-900">Semantic DPR &amp; Description Matching</h2>
             </div>
-            <p className="font-sans text-sm sm:text-base text-slate-600 leading-relaxed">
-              Tender splitting and duplicate proposals often disguise identical scopes of work under minor wording alterations. ArthaSentinel extracts and normalizes Detailed Project Report (DPR) descriptions using dense vector sentence embeddings.
+            <p className="font-sans text-sm sm:text-base text-slate-600 leading-relaxed max-w-4xl">
+              Tender splitting and duplicate proposals often disguise identical scopes of work under minor wording alterations or varied punctuation. ArthaSentinel extracts and normalizes Detailed Project Report (DPR) descriptions using dense vector sentence embeddings.
             </p>
-            <div className="p-5 rounded-xl bg-white border border-slate-200 space-y-2 text-xs sm:text-sm font-sans text-slate-600 shadow-2xs">
-              <p>
-                Pairs with cosine similarity exceeding <strong>0.80</strong> across adjacent Gram Panchayats or consecutive fiscal quarters are automatically flagged as <em>potentially related works</em>.
+            <div className="border-l-2 border-indigo-600 pl-4 space-y-1.5 text-xs sm:text-sm font-sans text-slate-600">
+              <p className="leading-relaxed">
+                Pairs with cosine similarity exceeding <strong>0.80</strong> across the same Gram Panchayat, contiguous blocks, or consecutive fiscal quarters are automatically flagged as <em>potentially related works</em> requiring scope verification before fund disbursement.
               </p>
             </div>
           </section>
 
-          {/* 3. Geospatial Signals */}
+          {/* 3. Administrative Concentration & Cross-Scheme Verification */}
           <section className="pt-8 space-y-4">
             <div className="flex items-center gap-2">
-              <span className="font-emphasis text-xs font-bold text-sky-700 bg-sky-50 px-2 py-0.5 rounded border border-sky-200">MODULE 03</span>
-              <h2 className="font-heading text-xl sm:text-2xl font-bold text-slate-900">Spatial Proximity &amp; Cross-Scheme Analysis</h2>
+              <span className="font-emphasis text-xs font-bold text-sky-700 bg-sky-50 px-2.5 py-0.5 rounded border border-sky-200">MODULE 03</span>
+              <h2 className="font-heading text-xl sm:text-2xl font-bold text-slate-900">Administrative Concentration &amp; Cross-Scheme Asset Verification</h2>
             </div>
-            <p className="font-sans text-sm sm:text-base text-slate-600 leading-relaxed">
-              Every MPLADS record is matched against national geographic registry boundaries and cross-referenced with public infrastructure repositories (including Jal Jeevan Mission and PMGSY).
+            <p className="font-sans text-sm sm:text-base text-slate-600 leading-relaxed max-w-4xl">
+              Without requiring GPS coordinates, ArthaSentinel scrutinizes administrative entity hierarchies down to the Gram Panchayat and Block level to detect abnormal resource clustering and cross-scheme duplication.
             </p>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs sm:text-sm font-sans text-slate-700">
-              <div className="p-5 rounded-xl bg-white border border-slate-200 shadow-2xs space-y-1">
-                <strong className="block text-slate-900 font-heading text-base">DBSCAN Spatial Clustering</strong>
-                Identifies abnormally dense asset allocations within localized clusters that warrant geographic verification.
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2 text-xs sm:text-sm font-sans text-slate-700">
+              <div className="border-l-2 border-sky-600 pl-4 space-y-1.5">
+                <strong className="block text-slate-900 font-heading text-base">Entity &amp; Vendor Concentration (HHI)</strong>
+                <p className="text-slate-600 leading-relaxed">
+                  Computes Herfindahl-Hirschman Index (HHI) scores across implementing agencies and local bodies to surface disproportionate allocations to single entities.
+                </p>
               </div>
-              <div className="p-5 rounded-xl bg-white border border-slate-200 shadow-2xs space-y-1">
-                <strong className="block text-slate-900 font-heading text-base">Co-location Detection</strong>
-                Flags assets situated within 50 meters of existing registered public infrastructure to highlight potential duplicative claims.
+              <div className="border-l-2 border-sky-600 pl-4 space-y-1.5">
+                <strong className="block text-slate-900 font-heading text-base">Cross-Scheme Registry Overlap</strong>
+                <p className="text-slate-600 leading-relaxed">
+                  Cross-references sanctioned works against public registry records (Jal Jeevan Mission, PMGSY, state municipal grants) within the same village or ward to flag potential double-funding.
+                </p>
               </div>
             </div>
           </section>
@@ -111,31 +119,31 @@ export default function AboutPage() {
           {/* 4. Risk Scoring & Calibration */}
           <section className="pt-8 space-y-4">
             <div className="flex items-center gap-2">
-              <span className="font-emphasis text-xs font-bold text-orange-700 bg-orange-50 px-2 py-0.5 rounded border border-orange-200">MODULE 04</span>
+              <span className="font-emphasis text-xs font-bold text-amber-700 bg-amber-50 px-2.5 py-0.5 rounded border border-amber-200">MODULE 04</span>
               <h2 className="font-heading text-xl sm:text-2xl font-bold text-slate-900">Composite Risk Scoring &amp; Calibration</h2>
             </div>
-            <p className="font-sans text-sm sm:text-base text-slate-600 leading-relaxed">
-              Scores are calibrated from 0 to 100 as an ensemble of cost deviation, textual overlap, geographic isolation, and tender timing:
+            <p className="font-sans text-sm sm:text-base text-slate-600 leading-relaxed max-w-4xl">
+              Scores are calibrated on an 0–100 scale using an ensemble of cost deviation Z-scores, semantic textual overlap, administrative concentration, and sanction velocity:
             </p>
-            <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-2xs">
+            <div className="overflow-x-auto border-t border-b border-slate-200 py-2">
               <table className="w-full text-left text-xs sm:text-sm">
-                <thead className="bg-[#F8F7F2] border-b border-slate-200 font-semibold text-slate-600 font-sans">
+                <thead className="border-b border-slate-200 text-slate-500 font-semibold uppercase tracking-wider font-emphasis text-[11px]">
                   <tr>
-                    <th className="py-3 px-5">Model Pipeline</th>
-                    <th className="py-3 px-5">Precision</th>
-                    <th className="py-3 px-5">Recall</th>
-                    <th className="py-3 px-5">F1 Score</th>
-                    <th className="py-3 px-5">Calibration Set</th>
+                    <th className="py-2.5 px-3">Model Pipeline</th>
+                    <th className="py-2.5 px-3">Precision</th>
+                    <th className="py-2.5 px-3">Recall</th>
+                    <th className="py-2.5 px-3">F1 Score</th>
+                    <th className="py-2.5 px-3">Calibration Set</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 font-data">
                   {VALIDATION_METRICS.map((vm, i) => (
-                    <tr key={i} className="hover:bg-slate-50/50">
-                      <td className="py-3 px-5 font-sans font-medium text-slate-800">{vm.model}</td>
-                      <td className="py-3 px-5 text-emerald-700 font-semibold">{(vm.precision * 100).toFixed(1)}%</td>
-                      <td className="py-3 px-5 text-emerald-700 font-semibold">{(vm.recall * 100).toFixed(1)}%</td>
-                      <td className="py-3 px-5 text-blue-800 font-semibold">{vm.f1Score.toFixed(3)}</td>
-                      <td className="py-3 px-5 text-slate-500">{vm.benchmarkCases} benchmark cases</td>
+                    <tr key={i} className="hover:bg-slate-50/50 transition-colors">
+                      <td className="py-3 px-3 font-sans font-medium text-slate-900">{vm.model}</td>
+                      <td className="py-3 px-3 text-emerald-700 font-semibold">{(vm.precision * 100).toFixed(1)}%</td>
+                      <td className="py-3 px-3 text-emerald-700 font-semibold">{(vm.recall * 100).toFixed(1)}%</td>
+                      <td className="py-3 px-3 text-blue-800 font-semibold">{vm.f1Score.toFixed(3)}</td>
+                      <td className="py-3 px-3 text-slate-500">{vm.benchmarkCases} benchmark cases</td>
                     </tr>
                   ))}
                 </tbody>
@@ -149,8 +157,8 @@ export default function AboutPage() {
           <Link href="/detection" className="text-sm font-semibold text-blue-700 hover:text-blue-900 hover:underline">
             View Live Detection Engine →
           </Link>
-          <Link href="/investigations" className="px-6 py-3 rounded-xl bg-[#1E3A8A] text-white text-sm font-semibold hover:bg-[#1D4ED8] transition-colors">
-            Open Investigations Queue
+          <Link href="/investigations" className="px-6 py-2.5 rounded-lg bg-[#1E3A8A] text-white text-xs sm:text-sm font-semibold hover:bg-[#1D4ED8] transition-colors shadow-xs">
+            Open Priority Scrutiny Queue
           </Link>
         </div>
       </main>

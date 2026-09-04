@@ -106,13 +106,13 @@ export interface RelatedWork {
   workId: string;
   relatedWorkId: string;
   similarityScore: number;
-  distance: number;
   categoryMatch: boolean;
   costDifference: number;
   relatedDescription: string;
   relatedConstituency: string;
   relatedAmount: number;
-  relationshipType: "semantic" | "geographic" | "vendor" | "pattern";
+  relationshipType: "semantic" | "constituency" | "vendor" | "pattern";
+  administrativeOverlap: string;
 }
 
 export interface AuditEvent {
@@ -1500,11 +1500,11 @@ export const INVESTIGATIONS: Investigation[] = [
 // ─── Related Works ───────────────────────────────────────────────────────────
 
 export const RELATED_WORKS: RelatedWork[] = [
-  { workId: "MPL-48291", relatedWorkId: "MPL-38192", similarityScore: 0.92, distance: 1.8, categoryMatch: true, costDifference: 220000, relatedDescription: "Construction of Community Centre with Integrated Training Facility", relatedConstituency: "Bhopal Parliamentary", relatedAmount: 4600000, relationshipType: "semantic" },
-  { workId: "MPL-48291", relatedWorkId: "MPL-92104", similarityScore: 0.41, distance: 0.9, categoryMatch: false, costDifference: 2620000, relatedDescription: "Bus Shelter Construction with Solar Powered Lighting", relatedConstituency: "Bhopal Parliamentary", relatedAmount: 2200000, relationshipType: "geographic" },
-  { workId: "MPL-38192", relatedWorkId: "MPL-48291", similarityScore: 0.92, distance: 1.8, categoryMatch: true, costDifference: 220000, relatedDescription: "Construction of Multi-Purpose Community Hall & Solar Microgrid", relatedConstituency: "Bhopal Parliamentary", relatedAmount: 4820000, relationshipType: "semantic" },
-  { workId: "MPL-55301", relatedWorkId: "MPL-55301-JJM", similarityScore: 0.93, distance: 0.018, categoryMatch: true, costDifference: 850000, relatedDescription: "Community RO Water Purification Unit (Jal Jeevan Mission)", relatedConstituency: "Varanasi Parliamentary", relatedAmount: 2100000, relationshipType: "geographic" },
-  { workId: "MPL-63218", relatedWorkId: "MPL-2023-0491", similarityScore: 0.91, distance: 280, categoryMatch: true, costDifference: 2000000, relatedDescription: "RO Desalination Unit, Nagapattinam Coastal Taluk", relatedConstituency: "Nagapattinam Parliamentary", relatedAmount: 3400000, relationshipType: "semantic" },
+  { workId: "MPL-48291", relatedWorkId: "MPL-38192", similarityScore: 0.92, categoryMatch: true, costDifference: 220000, relatedDescription: "Construction of Community Centre with Integrated Training Facility", relatedConstituency: "Bhopal Parliamentary", relatedAmount: 4600000, relationshipType: "semantic", administrativeOverlap: "Same Block & Implementing Agency" },
+  { workId: "MPL-48291", relatedWorkId: "MPL-92104", similarityScore: 0.41, categoryMatch: false, costDifference: 2620000, relatedDescription: "Bus Shelter Construction with Solar Powered Lighting", relatedConstituency: "Bhopal Parliamentary", relatedAmount: 2200000, relationshipType: "constituency", administrativeOverlap: "Same Parliamentary Constituency Corridor" },
+  { workId: "MPL-38192", relatedWorkId: "MPL-48291", similarityScore: 0.92, categoryMatch: true, costDifference: 220000, relatedDescription: "Construction of Multi-Purpose Community Hall & Solar Microgrid", relatedConstituency: "Bhopal Parliamentary", relatedAmount: 4820000, relationshipType: "semantic", administrativeOverlap: "Same Block & Implementing Agency" },
+  { workId: "MPL-55301", relatedWorkId: "MPL-55301-JJM", similarityScore: 0.93, categoryMatch: true, costDifference: 850000, relatedDescription: "Community RO Water Purification Unit (Jal Jeevan Mission)", relatedConstituency: "Varanasi Parliamentary", relatedAmount: 2100000, relationshipType: "constituency", administrativeOverlap: "Identical Gram Panchayat Parcel (JJM Registry Overlap)" },
+  { workId: "MPL-63218", relatedWorkId: "MPL-2023-0491", similarityScore: 0.91, categoryMatch: true, costDifference: 2000000, relatedDescription: "RO Desalination Unit, Nagapattinam Coastal Taluk", relatedConstituency: "Nagapattinam Parliamentary", relatedAmount: 3400000, relationshipType: "semantic", administrativeOverlap: "Adjacent Coastal Taluk Specification" },
 ];
 
 // ─── All Audit Events (chronological, system-wide) ───────────────────────────

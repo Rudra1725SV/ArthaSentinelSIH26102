@@ -153,47 +153,47 @@ export function Navbar() {
         </div>
       </div>
 
-      {/* ─── Prominent Horizontal Tabs (EmpoweredIndian Layout) ─── */}
-      <div className="mx-auto max-w-[1500px] px-3 sm:px-6">
-        <nav className="flex items-center space-x-1 sm:space-x-2 overflow-x-auto py-1.5 no-scrollbar" aria-label="Tabs">
+      {/* ─── Subtle Institutional Horizontal Tabs ─── */}
+      <div className="mx-auto max-w-[1500px] px-5 sm:px-8">
+        <nav className="flex items-center space-x-6 sm:space-x-8 overflow-x-auto no-scrollbar" aria-label="Tabs">
           {NAV_TABS.map((tab) => {
             const active = isTabActive(tab.href);
             return (
               <Link
                 key={tab.href}
                 href={tab.href}
-                className={`group relative flex items-center gap-2.5 px-4 py-2.5 sm:px-5 sm:py-3 rounded-lg text-sm sm:text-[15px] font-sans font-semibold transition-all whitespace-nowrap cursor-pointer ${
+                className={`group relative flex items-center gap-2 py-3 text-xs sm:text-[13px] font-sans tracking-normal transition-colors whitespace-nowrap cursor-pointer ${
                   active
-                    ? "bg-white text-blue-900 shadow-sm border border-slate-200/90 font-bold"
-                    : "text-slate-600 hover:text-slate-950 hover:bg-white/60"
+                    ? "text-blue-950 font-bold"
+                    : "text-slate-600 hover:text-slate-900 font-medium"
                 }`}
               >
                 {/* Tab Icon */}
-                <span className={`transition-colors ${active ? "text-blue-700" : "text-slate-400 group-hover:text-slate-700"}`}>
+                <span className={`transition-colors ${active ? "text-blue-700" : "text-slate-400 group-hover:text-slate-600"}`}>
                   {tab.icon}
                 </span>
 
                 {/* Tab Label */}
                 <span>{tab.label}</span>
 
-                {/* Optional Badge */}
+                {/* Optional Subtle Badge */}
                 {tab.badge && (
                   <span
-                    className={`font-emphasis text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
+                    className={`font-data text-[10px] font-semibold px-1.5 py-0.5 rounded ${
                       active
-                        ? "bg-blue-100 text-blue-800"
+                        ? "bg-blue-100/80 text-blue-900"
                         : tab.badge.includes("Flagged")
-                        ? "bg-orange-100 text-orange-800"
-                        : "bg-slate-100 text-slate-600 group-hover:bg-slate-200"
+                        ? "bg-orange-100/80 text-orange-800"
+                        : "bg-slate-100 text-slate-500 group-hover:bg-slate-200/60"
                     }`}
                   >
                     {tab.badge}
                   </span>
                 )}
 
-                {/* Bottom Active Indicator bar */}
+                {/* Sleek Active Indicator Bar */}
                 {active && (
-                  <span className="absolute bottom-0 left-3 right-3 h-[2.5px] bg-[#1D4ED8] rounded-full" />
+                  <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-blue-700" />
                 )}
               </Link>
             );
