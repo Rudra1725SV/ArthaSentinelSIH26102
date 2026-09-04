@@ -9,6 +9,9 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-inter), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-heading: var(--font-poppins), sans-serif;
+  --font-emphasis: var(--font-montserrat), sans-serif;
+  --font-data: var(--font-roboto), -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-editorial: var(--font-editorial), Georgia, Cambria, serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
   
   --color-ivory: #FAF9F5;
@@ -97,6 +100,15 @@
   }
   h1, h2, h3, h4, .font-heading {
     font-family: var(--font-heading);
+  }
+  .font-emphasis {
+    font-family: var(--font-emphasis);
+  }
+  .font-data {
+    font-family: var(--font-data);
+  }
+  .font-editorial {
+    font-family: var(--font-editorial);
   }
 }
 

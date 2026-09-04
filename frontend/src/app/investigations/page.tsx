@@ -5,7 +5,6 @@ import Link from "next/link";
 import { DashboardLayout } from "@/components/AppSidebar";
 import { WORKS, INVESTIGATIONS, formatCurrency, getRiskTier } from "@/lib/mock-data";
 import { RiskBadge } from "@/components/RiskBadge";
-import { AnomalyTypeBadge } from "@/components/AnomalyTypeBadge";
 
 const STATUSES = ["ALL", "Flagged", "Triaged", "Under Review", "Escalated", "Resolved", "Dismissed"];
 const RISK_TIERS = ["ALL", "Critical", "Elevated", "Moderate", "Low"];
@@ -53,25 +52,50 @@ export default function InvestigationsPage() {
 
   return (
     <DashboardLayout>
-      <div className="p-6 lg:p-8 space-y-6">
+      <div className="space-y-6">
         <div>
-          <h1 className="font-heading text-2xl font-bold tracking-tight text-slate-950">Investigations</h1>
-          <p className="text-sm text-slate-600 mt-0.5">Cases requiring human review. Synthetic demonstration data.</p>
+          <div className="font-emphasis text-xs font-bold tracking-wider text-orange-700 uppercase">
+            SCRUTINY QUEUE · PRIORITY TRIAGE
+          </div>
+          <h1 className="font-heading text-3xl font-bold tracking-tight text-slate-950 mt-1">Investigations</h1>
+          <p className="font-sans text-sm sm:text-base text-slate-600 mt-1">
+            Projects flagged by multi-signal detection models requiring verified investigator due diligence.
+          </p>
         </div>
 
-        {/* Filters */}
-        <div className="flex flex-wrap items-center gap-3 bg-white border border-slate-200 p-3 rounded-xl">
-          <div className="relative flex-1 min-w-[200px]">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" strokeWidth="2"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>
-            <input type="text" placeholder="Search by Work ID, description, constituency..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-full pl-9 pr-4 py-2 text-sm bg-white border border-slate-200 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-blue-600" />
+        {/* Filters Row in Inter */}
+        <div className="flex flex-wrap items-center gap-3 bg-white border border-slate-200 p-3 sm:p-4 rounded-2xl shadow-2xs">
+          <div className="relative flex-1 min-w-[240px]">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" strokeWidth="2">
+              <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
+            <input
+              type="text"
+              placeholder="Search by Work ID, description, constituency..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-2.5 font-sans text-sm bg-white border border-slate-200 rounded-xl focus:outline-hidden focus:ring-2 focus:ring-blue-600"
+            />
           </div>
-          <select value={riskFilter} onChange={(e) => setRiskFilter(e.target.value)} className="bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs font-medium text-slate-700">
-            {RISK_TIERS.map((t) => <option key={t} value={t}>{t === "ALL" ? "All Risk Tiers" : t}</option>)}
+          <select
+            value={riskFilter}
+            onChange={(e) => setRiskFilter(e.target.value)}
+            className="bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 font-sans text-xs sm:text-sm font-semibold text-slate-700"
+          >
+            {RISK_TIERS.map((t) => <option key={t} value={t}>{t === "ALL" ? "All Risk Tiers" : `${t} Risk`}</option>)}
           </select>
-          <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs font-medium text-slate-700">
-            {STATUSES.map((s) => <option key={s} value={s}>{s === "ALL" ? "All Statuses" : s}</option>)}
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 font-sans text-xs sm:text-sm font-semibold text-slate-700"
+          >
+            {STATUSES.map((s) => <option key={s} value={s}>{s === "ALL" ? "All Case Statuses" : s}</option>)}
           </select>
-          <select value={anomalyFilter} onChange={(e) => setAnomalyFilter(e.target.value)} className="bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs font-medium text-slate-700">
+          <select
+            value={anomalyFilter}
+            onChange={(e) => setAnomalyFilter(e.target.value)}
+            className="bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 font-sans text-xs sm:text-sm font-semibold text-slate-700"
+          >
             <option value="ALL">All Anomaly Types</option>
             <option value="cost">Cost Variance</option>
             <option value="semantic">Semantic Overlap</option>
@@ -80,47 +104,61 @@ export default function InvestigationsPage() {
           </select>
         </div>
 
-        <div className="text-xs text-slate-500 font-mono">{filtered.length} cases matching filters</div>
+        <div className="flex items-center justify-between text-xs font-data text-slate-500">
+          <span>{filtered.length} flagged cases matching filters</span>
+          <span>Sorted by {sortField === "riskScore" ? "Risk Score" : "Sanction Cost"} ({sortDir.toUpperCase()})</span>
+        </div>
 
-        {/* Table */}
-        <div className="rounded-xl border border-slate-200 bg-white shadow-2xs overflow-hidden">
+        {/* Table using Roboto (font-data) for dense data */}
+        <div className="rounded-2xl border border-slate-200 bg-white shadow-2xs overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
-              <thead className="bg-[#F8F7F2] border-b border-slate-200 text-xs font-semibold text-slate-600 uppercase tracking-wider">
+            <table className="w-full text-left font-data text-sm">
+              <thead className="bg-[#F8F7F2] border-b border-slate-200 text-xs font-sans font-bold text-slate-700 uppercase tracking-wider">
                 <tr>
-                  <th className="py-3.5 pl-5 pr-3 cursor-pointer select-none" onClick={() => toggleSort("riskScore")}>
+                  <th className="py-4 pl-6 pr-3 cursor-pointer select-none" onClick={() => toggleSort("riskScore")}>
                     Risk {sortField === "riskScore" && (sortDir === "desc" ? "↓" : "↑")}
                   </th>
-                  <th className="px-3 py-3.5">Work ID</th>
-                  <th className="px-3 py-3.5">Description</th>
-                  <th className="px-3 py-3.5">Location</th>
-                  <th className="px-3 py-3.5 cursor-pointer select-none" onClick={() => toggleSort("sanctionedAmount")}>
+                  <th className="px-3 py-4">Work ID</th>
+                  <th className="px-3 py-4">Description</th>
+                  <th className="px-3 py-4">Location</th>
+                  <th className="px-3 py-4 cursor-pointer select-none" onClick={() => toggleSort("sanctionedAmount")}>
                     Cost {sortField === "sanctionedAmount" && (sortDir === "desc" ? "↓" : "↑")}
                   </th>
-                  <th className="px-3 py-3.5">Primary Signal</th>
-                  <th className="px-3 py-3.5">Status</th>
-                  <th className="px-3 py-3.5">Assigned To</th>
+                  <th className="px-3 py-4">Primary Signal</th>
+                  <th className="px-3 py-4">Status</th>
+                  <th className="px-3 py-4 pr-6">Assigned To</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-200">
+              <tbody className="divide-y divide-slate-200 font-data">
                 {filtered.length === 0 ? (
-                  <tr><td colSpan={8} className="py-12 text-center text-sm text-slate-500">No cases matching criteria.</td></tr>
+                  <tr><td colSpan={8} className="py-12 text-center text-sm font-sans text-slate-500">No cases matching criteria.</td></tr>
                 ) : filtered.map((inv) => (
                   <tr key={inv.investigationId} className="hover:bg-slate-50/80 transition-colors">
-                    <td className="py-4 pl-5 pr-3">
+                    <td className="py-4 pl-6 pr-3 font-sans">
                       <RiskBadge score={inv.riskScore} tier={getRiskTier(inv.riskScore)} />
                     </td>
                     <td className="px-3 py-4">
-                      <Link href={`/investigations/${inv.workId}`} className="font-mono text-xs font-semibold text-blue-800 hover:underline">{inv.workId}</Link>
+                      <Link href={`/investigations/${inv.workId}`} className="font-bold text-blue-800 hover:underline">
+                        {inv.workId}
+                      </Link>
                     </td>
-                    <td className="px-3 py-4 max-w-xs">
-                      <Link href={`/investigations/${inv.workId}`} className="font-medium text-slate-900 hover:text-blue-700 line-clamp-1">{inv.work.description}</Link>
+                    <td className="px-3 py-4 max-w-sm">
+                      <Link href={`/investigations/${inv.workId}`} className="font-sans font-semibold text-slate-900 hover:text-blue-700 line-clamp-1">
+                        {inv.work.description}
+                      </Link>
                     </td>
-                    <td className="px-3 py-4 text-xs text-slate-600">{inv.work.constituency}<br /><span className="text-slate-400">{inv.work.district}, {inv.work.state}</span></td>
-                    <td className="px-3 py-4 text-xs font-medium text-slate-900 whitespace-nowrap">{formatCurrency(inv.work.sanctionedAmount)}</td>
-                    <td className="px-3 py-4 text-xs text-orange-700 font-medium max-w-[200px] line-clamp-2">{inv.primarySignal}</td>
-                    <td className="px-3 py-4">
-                      <span className={`inline-flex px-2 py-0.5 rounded text-[11px] font-medium border ${
+                    <td className="px-3 py-4 text-xs text-slate-700">
+                      <div>{inv.work.constituency}</div>
+                      <div className="text-slate-400">{inv.work.district}, {inv.work.state}</div>
+                    </td>
+                    <td className="px-3 py-4 text-xs font-bold text-slate-900 whitespace-nowrap">
+                      {formatCurrency(inv.work.sanctionedAmount)}
+                    </td>
+                    <td className="px-3 py-4 text-xs text-orange-700 font-semibold max-w-[220px] line-clamp-2">
+                      {inv.primarySignal}
+                    </td>
+                    <td className="px-3 py-4 font-sans">
+                      <span className={`inline-flex px-2.5 py-1 rounded-md text-[11px] font-bold border ${
                         inv.status === "Flagged" ? "bg-red-50 text-red-800 border-red-200" :
                         inv.status === "Escalated" ? "bg-orange-50 text-orange-800 border-orange-200" :
                         inv.status === "Under Review" ? "bg-blue-50 text-blue-800 border-blue-200" :
@@ -129,7 +167,9 @@ export default function InvestigationsPage() {
                         "bg-slate-100 text-slate-600 border-slate-200"
                       }`}>{inv.status}</span>
                     </td>
-                    <td className="px-3 py-4 text-xs text-slate-600">{inv.assignedTo}</td>
+                    <td className="px-3 py-4 pr-6 text-xs text-slate-600">
+                      {inv.assignedTo}
+                    </td>
                   </tr>
                 ))}
               </tbody>

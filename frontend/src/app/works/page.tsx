@@ -47,64 +47,104 @@ export default function WorksPage() {
 
   return (
     <DashboardLayout>
-      <div className="p-6 lg:p-8 space-y-6">
+      <div className="space-y-6">
         <div>
-          <h1 className="font-heading text-2xl font-bold tracking-tight text-slate-950">Work Explorer</h1>
-          <p className="text-sm text-slate-600 mt-0.5">{WORKS.length} MPLADS works indexed. Browse, filter, and drill into any project. Synthetic data.</p>
+          <div className="font-emphasis text-xs font-bold tracking-wider text-blue-800 uppercase">
+            PUBLIC PROJECT REPOSITORY · SIH26102
+          </div>
+          <h1 className="font-heading text-3xl font-bold tracking-tight text-slate-950 mt-1">Work Explorer</h1>
+          <p className="font-sans text-sm sm:text-base text-slate-600 mt-1">
+            Browse, filter, and inspect sanctioned MPLADS infrastructure works across all parliamentary constituencies.
+          </p>
         </div>
 
-        {/* Filters */}
-        <div className="flex flex-wrap items-center gap-3 bg-white border border-slate-200 p-3 rounded-xl">
-          <div className="relative flex-1 min-w-[200px]">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" strokeWidth="2"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>
-            <input type="text" placeholder="Search by Work ID, description, constituency, district..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-full pl-9 pr-4 py-2 text-sm bg-white border border-slate-200 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-blue-600" />
+        {/* Filters in Inter */}
+        <div className="flex flex-wrap items-center gap-3 bg-white border border-slate-200 p-3 sm:p-4 rounded-2xl shadow-2xs">
+          <div className="relative flex-1 min-w-[240px]">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" strokeWidth="2">
+              <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
+            <input
+              type="text"
+              placeholder="Search by Work ID, description, constituency, district..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-2.5 font-sans text-sm bg-white border border-slate-200 rounded-xl focus:outline-hidden focus:ring-2 focus:ring-blue-600"
+            />
           </div>
-          <select value={stateFilter} onChange={(e) => setStateFilter(e.target.value)} className="bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs font-medium text-slate-700">
+          <select
+            value={stateFilter}
+            onChange={(e) => setStateFilter(e.target.value)}
+            className="bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 font-sans text-xs sm:text-sm font-semibold text-slate-700"
+          >
             {states.map((s) => <option key={s} value={s}>{s === "ALL" ? "All States" : s}</option>)}
           </select>
-          <select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)} className="bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs font-medium text-slate-700">
+          <select
+            value={categoryFilter}
+            onChange={(e) => setCategoryFilter(e.target.value)}
+            className="bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 font-sans text-xs sm:text-sm font-semibold text-slate-700"
+          >
             {categories.map((c) => <option key={c} value={c}>{c === "ALL" ? "All Categories" : c}</option>)}
           </select>
-          <select value={riskFilter} onChange={(e) => setRiskFilter(e.target.value)} className="bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs font-medium text-slate-700">
-            {["ALL", "Critical", "Elevated", "Moderate", "Low"].map((t) => <option key={t} value={t}>{t === "ALL" ? "All Risk Tiers" : t}</option>)}
+          <select
+            value={riskFilter}
+            onChange={(e) => setRiskFilter(e.target.value)}
+            className="bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 font-sans text-xs sm:text-sm font-semibold text-slate-700"
+          >
+            {["ALL", "Critical", "Elevated", "Moderate", "Low"].map((t) => <option key={t} value={t}>{t === "ALL" ? "All Risk Tiers" : `${t} Risk`}</option>)}
           </select>
         </div>
 
-        <div className="text-xs text-slate-500 font-mono">{filtered.length} works</div>
+        <div className="flex items-center justify-between text-xs font-data text-slate-500">
+          <span>{filtered.length} works indexed matching filters</span>
+          <span>Sorted by {sortField === "sanctionedAmount" ? "Sanctioned Amount" : "Risk Score"} ({sortDir.toUpperCase()})</span>
+        </div>
 
-        <div className="rounded-xl border border-slate-200 bg-white shadow-2xs overflow-hidden">
+        {/* Table using Roboto (font-data) for dense numerical readability */}
+        <div className="rounded-2xl border border-slate-200 bg-white shadow-2xs overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
-              <thead className="bg-[#F8F7F2] border-b border-slate-200 text-xs font-semibold text-slate-600 uppercase tracking-wider">
+            <table className="w-full text-left font-data text-sm">
+              <thead className="bg-[#F8F7F2] border-b border-slate-200 text-xs font-sans font-bold text-slate-700 uppercase tracking-wider">
                 <tr>
-                  <th className="py-3.5 pl-5 pr-3">Work ID</th>
-                  <th className="px-3 py-3.5">Description</th>
-                  <th className="px-3 py-3.5">Constituency</th>
-                  <th className="px-3 py-3.5">Category</th>
-                  <th className="px-3 py-3.5 cursor-pointer select-none" onClick={() => toggleSort("sanctionedAmount")}>
+                  <th className="py-4 pl-6 pr-3">Work ID</th>
+                  <th className="px-3 py-4">Description</th>
+                  <th className="px-3 py-4">Constituency</th>
+                  <th className="px-3 py-4">Category</th>
+                  <th className="px-3 py-4 cursor-pointer select-none" onClick={() => toggleSort("sanctionedAmount")}>
                     Cost {sortField === "sanctionedAmount" && (sortDir === "desc" ? "↓" : "↑")}
                   </th>
-                  <th className="px-3 py-3.5 cursor-pointer select-none" onClick={() => toggleSort("riskScore")}>
+                  <th className="px-3 py-4 cursor-pointer select-none" onClick={() => toggleSort("riskScore")}>
                     Risk {sortField === "riskScore" && (sortDir === "desc" ? "↓" : "↑")}
                   </th>
-                  <th className="px-3 py-3.5 pr-5">Status</th>
+                  <th className="px-3 py-4 pr-6">Status</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-200">
+              <tbody className="divide-y divide-slate-200 font-data">
                 {filtered.map((w) => (
                   <tr key={w.workId} className="hover:bg-slate-50/80 transition-colors">
-                    <td className="py-4 pl-5 pr-3">
-                      <Link href={`/investigations/${w.workId}`} className="font-mono text-xs font-semibold text-blue-800 hover:underline">{w.workId}</Link>
+                    <td className="py-4 pl-6 pr-3">
+                      <Link href={`/investigations/${w.workId}`} className="font-bold text-blue-800 hover:underline">
+                        {w.workId}
+                      </Link>
                     </td>
-                    <td className="px-3 py-4 max-w-xs">
-                      <Link href={`/investigations/${w.workId}`} className="font-medium text-slate-900 hover:text-blue-700 line-clamp-1">{w.description}</Link>
+                    <td className="px-3 py-4 max-w-sm">
+                      <Link href={`/investigations/${w.workId}`} className="font-sans font-semibold text-slate-900 hover:text-blue-700 line-clamp-1">
+                        {w.description}
+                      </Link>
                     </td>
-                    <td className="px-3 py-4 text-xs text-slate-600">{w.constituency}<br /><span className="text-slate-400">{w.district}, {w.state}</span></td>
-                    <td className="px-3 py-4 text-xs text-slate-600">{w.category}</td>
-                    <td className="px-3 py-4 text-xs font-medium text-slate-900 whitespace-nowrap">{formatCurrency(w.sanctionedAmount)}</td>
-                    <td className="px-3 py-4"><RiskBadge score={w.riskScore} tier={getRiskTier(w.riskScore)} /></td>
-                    <td className="px-3 py-4 pr-5">
-                      <span className={`inline-flex px-2 py-0.5 rounded text-[11px] font-medium border ${
+                    <td className="px-3 py-4 text-xs text-slate-700">
+                      <div>{w.constituency}</div>
+                      <div className="text-slate-400">{w.district}, {w.state}</div>
+                    </td>
+                    <td className="px-3 py-4 text-xs font-sans text-slate-700">{w.category}</td>
+                    <td className="px-3 py-4 text-xs font-bold text-slate-900 whitespace-nowrap">
+                      {formatCurrency(w.sanctionedAmount)}
+                    </td>
+                    <td className="px-3 py-4 font-sans">
+                      <RiskBadge score={w.riskScore} tier={getRiskTier(w.riskScore)} />
+                    </td>
+                    <td className="px-3 py-4 pr-6 font-sans">
+                      <span className={`inline-flex px-2.5 py-1 rounded-md text-[11px] font-bold border ${
                         w.status === "Flagged" ? "bg-red-50 text-red-800 border-red-200" :
                         w.status === "Escalated" ? "bg-orange-50 text-orange-800 border-orange-200" :
                         w.status === "Under Review" ? "bg-blue-50 text-blue-800 border-blue-200" :
