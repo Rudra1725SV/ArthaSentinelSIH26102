@@ -12,11 +12,11 @@ export function RiskBadge({ score, tier, showScore = true, className = "" }: Ris
   const resolvedTier =
     tier ||
     (score !== undefined
-      ? score >= 0.8
+      ? (score > 1 ? score >= 80 : score >= 0.8)
         ? "Critical"
-        : score >= 0.6
+        : (score > 1 ? score >= 60 : score >= 0.6)
         ? "Elevated"
-        : score >= 0.3
+        : (score > 1 ? score >= 30 : score >= 0.3)
         ? "Moderate"
         : "Low"
       : "Moderate");

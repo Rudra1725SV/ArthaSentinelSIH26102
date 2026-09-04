@@ -28,8 +28,8 @@ export function NetworkGlobe({ className = "" }: { className?: string }) {
     let height = 0;
 
     // Generate ~220 points on a sphere using Fibonacci distribution
-    const numPoints = 220;
-    const sphereRadius = 180;
+    const numPoints = 300;
+    const sphereRadius = 260;
     const nodes: Node3D[] = [];
 
     const anomalyIndices = new Set([12, 34, 58, 89, 114, 142, 178, 195, 210]);
@@ -129,7 +129,7 @@ export function NetworkGlobe({ className = "" }: { className?: string }) {
 
       const centerX = width / 2;
       const centerY = height / 2;
-      const fov = 400;
+      const fov = 520;
 
       // Rotate nodes around X and Y axes
       const cosY = Math.cos(currentAngleY);
@@ -160,8 +160,8 @@ export function NetworkGlobe({ className = "" }: { className?: string }) {
         const y2 = node.y * cosX - z1 * sinX;
         const z2 = node.y * sinX + z1 * cosX;
 
-        // Perspective scale
-        const scale = fov / (fov + z2 + sphereRadius * 1.2);
+        // Perspective scale - magnified projection
+        const scale = fov / (fov + z2 + sphereRadius * 0.82);
         const px = centerX + x1 * scale;
         const py = centerY + y2 * scale;
 
@@ -273,7 +273,7 @@ export function NetworkGlobe({ className = "" }: { className?: string }) {
   return (
     <div
       ref={containerRef}
-      className={`relative w-full h-[460px] md:h-[540px] lg:h-[580px] select-none ${className}`}
+      className={`relative w-full h-[520px] md:h-[620px] lg:h-[700px] select-none ${className}`}
     >
       {/* Technical Blueprint Frame Overlay matching reference image */}
       <div className="absolute inset-0 pointer-events-none border border-slate-300/60 rounded-sm">

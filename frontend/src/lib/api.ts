@@ -1,6 +1,6 @@
-import { MOCK_WORKS, SYSTEM_STATS, VALIDATION_METRICS, Work, AuditRecord } from "./mock-data";
+import { WORKS, SYSTEM_STATS, VALIDATION_METRICS, Work, AuditEvent, getWorkById } from "./mock-data";
 
-export type { Work, AuditRecord } from "./mock-data";
+export type { Work, AuditEvent } from "./mock-data";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000";
 
@@ -12,13 +12,13 @@ export async function getWorks(params?: Record<string, string>): Promise<{ works
     return await res.json();
   } catch {
     // Graceful fallback to rich mock data
-    let filtered = [...MOCK_WORKS];
+    let filtered = [...WORKS];
     if (params?.search) {
       const q = params.search.toLowerCase();
       filtered = filtered.filter(
         (w) =>
-          w.id.toLowerCase().includes(q) ||
-          w.title.toLowerCase().includes(q) ||
+          w.workId.toLowerCase().includes(q) ||
+          w.description.toLowerCase().includes(q) ||
           w.constituency.toLowerCase().includes(q) ||
           w.implementingAgency.toLowerCase().includes(q)
       );
@@ -27,7 +27,7 @@ export async function getWorks(params?: Record<string, string>): Promise<{ works
       filtered = filtered.filter((w) => w.riskTier.toUpperCase() === params.tier.toUpperCase());
     }
     if (params?.type && params.type !== "ALL") {
-      filtered = filtered.filter((w) => w.anomalyFlags.some((f) => f.type === params.type));
+      filtered = filtered.filter((w) => w.anomalyTypes.includes(params.type as any));
     }
     return { works: filtered, total: filtered.length };
   }
@@ -39,8 +39,8 @@ export async function getWorkDetail(workId: string): Promise<Work | null> {
     if (!res.ok) throw new Error("Backend unavailable");
     return await res.json();
   } catch {
-    const found = MOCK_WORKS.find((w) => w.id === workId);
-    return found || MOCK_WORKS[0];
+    const found = getWorkById(workId);
+    return found || WORKS[0];
   }
 }
 
@@ -48,7 +48,7 @@ export async function submitReviewerAction(
   workId: string,
   action: "escalate" | "reviewed_no_issue" | "note_added",
   note?: string
-): Promise<{ success: boolean; auditRecord: AuditRecord }> {
+): Promise<{ success: boolean; auditRecord: AuditEvent }> {
   try {
     const res = await fetch(`${API_BASE}/api/works/${workId}/action`, {
       method: "POST",
@@ -58,32 +58,30 @@ export async function submitReviewerAction(
     if (!res.ok) throw new Error("Backend unavailable");
     return await res.json();
   } catch {
-    const newRecord: AuditRecord = {
-      id: "AUD-" + Math.floor(Math.random() * 10000),
-      timestamp: new Date().toISOString().replace("T", " ").substring(0, 19) + " IST",
-      actor: "Reviewer Officer (Active Session)",
-      role: "Public Finance Investigator",
-      action:
-        action === "escalate"
-          ? "ESCALATED"
-          : action === "reviewed_no_issue"
-          ? "REVIEWED_NO_ISSUE"
-          : "NOTE_ADDED",
-      notes: note || (action === "escalate" ? "Work escalated for field verification." : "Marked reviewed with no anomaly issue."),
+    // Synthetic audit trail fallback
+    const auditRecord: AuditEvent = {
+      id: "evt-" + Date.now(),
+      timestamp: new Date().toISOString(),
+      actor: "Dr. K. S. Ramanathan",
+      actorType: "investigator",
+      action: action === "escalate" ? "Escalated for administrative inquiry" : action === "reviewed_no_issue" ? "Marked as reviewed — within peer variance" : "Investigator observation recorded",
+      object: workId,
+      result: note || "Action logged to audit trail (client fallback)",
     };
-    return { success: true, auditRecord: newRecord };
+    return { success: true, auditRecord };
   }
 }
 
-export async function getValidationSummary() {
+export async function getHealthStatus(): Promise<{ status: string; version: string; worksIndexed: number }> {
   try {
-    const res = await fetch(`${API_BASE}/api/validation/summary`, { cache: "no-store" });
-    if (!res.ok) throw new Error("Backend unavailable");
+    const res = await fetch(`${API_BASE}/api/health`, { cache: "no-store" });
+    if (!res.ok) throw new Error();
     return await res.json();
   } catch {
     return {
-      stats: SYSTEM_STATS,
-      metrics: VALIDATION_METRICS,
+      status: "synthetic_mode",
+      version: "V2.4",
+      worksIndexed: SYSTEM_STATS.worksIndexed,
     };
   }
 }
