@@ -13,7 +13,7 @@ export default function DetectionPage() {
     { num: "03", name: "Peer Baseline", desc: "Dynamic cohort grouping by work category, financial year, and geographic terrain." },
     { num: "04", name: "Cost Outlier Analysis", desc: "Robust Z-score and IQR dispersion calculations against peer cohort." },
     { num: "05", name: "Semantic Similarity", desc: "Sentence transformer embeddings and cosine DPR text comparison." },
-    { num: "06", name: "Geospatial Clustering", desc: "Haversine proximity graph and DBSCAN spatial concentration indexing." },
+    { num: "06", name: "Constituency & Vendor Clustering", desc: "Graph-based entity resolution, contractor monopolies, and cross-scheme overlap." },
     { num: "07", name: "Ensemble Risk Scoring", desc: "Weighted composite scoring (0–100) combining all calibrated indicators." },
     { num: "08", name: "Investigator Triage", desc: "Evidence card generation, plain-language justification, and case assignment." },
   ];
@@ -33,7 +33,7 @@ export default function DetectionPage() {
             Every flag begins with a measurable deviation.
           </h1>
           <p className="font-sans text-base sm:text-lg text-slate-600 leading-relaxed max-w-3xl">
-            ArthaSentinel continuously scans sanctioned works against peer groups to isolate statistical, textual, and spatial outliers without subjective bias.
+            ArthaSentinel continuously scans sanctioned works against peer groups to isolate statistical, textual, and administrative outliers without subjective bias.
           </p>
         </div>
 
@@ -43,43 +43,37 @@ export default function DetectionPage() {
             <span className="w-2.5 h-2.5 rounded-full bg-blue-600 animate-pulse"></span>
             <span><strong>System Status:</strong> Live interactive client-side engine running with synthetic benchmarking dataset.</span>
           </div>
-          <span className="font-emphasis text-xs font-bold text-blue-700 bg-white px-2.5 py-1 rounded-md border border-blue-200">
-            V2.4 · ACTIVE SCRUTINY ENGINE
-          </span>
+          <span className="font-data text-xs text-blue-700 font-medium">Dataset-Driven Dynamic Architecture</span>
         </div>
 
         {/* ═══════════ PIPELINE FLOW ═══════════ */}
-        <div className="space-y-6">
-          <div className="border-b border-slate-200 pb-3">
-            <h2 className="font-heading text-2xl font-bold text-slate-950">End-to-End Analytical Pipeline</h2>
-            <p className="font-sans text-xs sm:text-sm text-slate-500 mt-0.5">How raw sanctioned work data progresses to structured investigative evidence</p>
-          </div>
-
+        <div className="space-y-4">
+          <h2 className="font-heading text-xl font-bold text-slate-950">Processing Stages</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {pipelineSteps.map((step) => (
-              <div key={step.num} className="p-5 rounded-xl border border-slate-200 bg-white shadow-2xs space-y-2.5 relative group hover:border-blue-300 transition-colors">
-                <div className="font-emphasis text-xs font-bold text-blue-700 bg-blue-50 w-7 h-7 rounded flex items-center justify-center border border-blue-200">
+              <div key={step.num} className="p-5 rounded-xl border border-slate-200 bg-white shadow-2xs space-y-2">
+                <span className="font-emphasis text-xs font-extrabold text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-200 inline-block">
                   {step.num}
-                </div>
-                <h3 className="font-heading text-base font-bold text-slate-900">{step.name}</h3>
-                <p className="font-sans text-xs text-slate-600 leading-relaxed">{step.desc}</p>
+                </span>
+                <div className="font-heading text-sm font-bold text-slate-900">{step.name}</div>
+                <div className="font-sans text-xs text-slate-600 leading-relaxed">{step.desc}</div>
               </div>
             ))}
           </div>
         </div>
 
-        {/* ═══════════ THREE CORE SIGNALS INTERACTIVE ═══════════ */}
+        {/* ═══════════ INTERACTIVE SIGNAL DRILLDOWN ═══════════ */}
         <div className="space-y-6">
-          <div className="border-b border-slate-200 pb-3">
-            <h2 className="font-heading text-2xl font-bold text-slate-950">Three Independent Detection Signals</h2>
-            <p className="font-sans text-xs sm:text-sm text-slate-500 mt-0.5">Explore the mathematical foundations of each signal</p>
+          <div className="flex items-center justify-between">
+            <h2 className="font-heading text-xl font-bold text-slate-950">Core Detection Signals</h2>
+            <span className="font-sans text-xs text-slate-500">Select a signal to view its formal specification</span>
           </div>
 
-          <div className="flex flex-wrap gap-2 border-b border-slate-200 pb-3">
+          <div className="flex flex-wrap gap-2">
             {[
               { id: "cost", label: "01. Cost Variance", desc: "Z-score & IQR" },
               { id: "semantic", label: "02. Semantic Similarity", desc: "Cosine & Embeddings" },
-              { id: "geographic", label: "03. Spatial Signals", desc: "DBSCAN & Haversine" },
+              { id: "geographic", label: "03. Constituency & Vendor Clustering", desc: "Monopolies & Overlap" },
             ].map((s) => (
               <button
                 key={s.id}
@@ -140,18 +134,18 @@ export default function DetectionPage() {
             <div className="p-7 rounded-2xl border border-sky-200 bg-white shadow-2xs space-y-4">
               <div className="flex items-center justify-between">
                 <span className="font-emphasis text-xs font-bold text-sky-800 bg-sky-50 px-2.5 py-1 rounded-md border border-sky-200">
-                  SIGNAL: GEOSPATIAL ANOMALIES
+                  SIGNAL: CONSTITUENCY &amp; VENDOR CLUSTERING
                 </span>
                 <span className="font-data text-xs text-slate-500 font-medium">Precision: 88.7% · Recall: 92.1%</span>
               </div>
-              <h3 className="font-heading text-xl font-bold text-slate-900">Spatial Concentration &amp; Infrastructure Overlap</h3>
+              <h3 className="font-heading text-xl font-bold text-slate-900">Administrative Concentration &amp; Contractor Monopolies</h3>
               <p className="font-sans text-sm text-slate-600 leading-relaxed">
-                Applies Haversine distance calculations and density-based clustering to uncover suspicious geographic clustering of works awarded to identical agencies, as well as physical co-location with existing centrally sponsored scheme assets.
+                Applies graph-based entity linking and concentration analysis to uncover suspicious aggregation of works awarded to identical agencies across Gram Panchayats, as well as institutional overlap with existing centrally sponsored scheme assets (e.g. JJM, PMGSY).
               </p>
               <div className="p-4 rounded-xl bg-[#FAF9F5] border border-slate-200 font-data text-xs text-slate-800 space-y-1.5">
-                <div className="text-slate-400 font-mono">// Proximity &amp; DBSCAN Radius</div>
-                <div>d = 2r × arcsin(sqrt(sin²(Δlat/2) + cos(lat1)cos(lat2)sin²(Δlon/2)))</div>
-                <div className="text-sky-700 font-semibold mt-1">Threshold: Co-location &lt; 50m with existing public asset triggers review</div>
+                <div className="text-slate-400 font-mono">// Herfindahl-Hirschman Concentration Index (HHI)</div>
+                <div>HHI = Σ (s_i)² where s_i is agency market share of sanctioned value in block</div>
+                <div className="text-sky-700 font-semibold mt-1">Threshold: HHI &gt; 0.25 (high concentration) or single entity &gt; 40% sanctions in 90 days triggers review</div>
               </div>
             </div>
           )}
@@ -176,8 +170,8 @@ export default function DetectionPage() {
             </div>
             <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-1">
               <span className="font-emphasis text-xs font-bold text-slate-500">Weight: 20%</span>
-              <div className="font-heading text-base font-bold text-slate-900">Spatial / Pattern Score</div>
-              <div className="font-sans text-xs text-slate-600">Density clustering &amp; fiscal timing</div>
+              <div className="font-heading text-base font-bold text-slate-900">Constituency / Pattern Score</div>
+              <div className="font-sans text-xs text-slate-600">Vendor concentration &amp; fiscal timing</div>
             </div>
           </div>
         </div>

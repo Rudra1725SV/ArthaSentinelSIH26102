@@ -92,20 +92,36 @@ export default function OverviewLandingPage() {
               <div className="pt-8 border-t border-slate-300/70">
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 divide-x-0 sm:divide-x divide-slate-300/70">
                   <div className="sm:pr-3">
-                    <div className="font-emphasis text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-950">12,48,320</div>
-                    <div className="font-emphasis text-[10px] sm:text-[11px] font-bold tracking-wider text-slate-500 uppercase mt-1">WORKS INDEXED</div>
+                    <div className="font-emphasis text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-950">
+                      {SYSTEM_STATS.totalWorks.toLocaleString()}
+                    </div>
+                    <div className="font-emphasis text-[10px] sm:text-[11px] font-bold tracking-wider text-slate-500 uppercase mt-1">
+                      WORKS INDEXED (SEED)
+                    </div>
                   </div>
                   <div className="sm:px-3">
-                    <div className="font-emphasis text-2xl sm:text-3xl font-extrabold tracking-tight text-orange-600">14</div>
-                    <div className="font-emphasis text-[10px] sm:text-[11px] font-bold tracking-wider text-slate-500 uppercase mt-1">FLAGGED THIS CYCLE</div>
+                    <div className="font-emphasis text-2xl sm:text-3xl font-extrabold tracking-tight text-orange-600">
+                      {SYSTEM_STATS.flaggedWorks}
+                    </div>
+                    <div className="font-emphasis text-[10px] sm:text-[11px] font-bold tracking-wider text-slate-500 uppercase mt-1">
+                      FLAGGED THIS CYCLE
+                    </div>
                   </div>
                   <div className="sm:px-3">
-                    <div className="font-emphasis text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-950">36</div>
-                    <div className="font-emphasis text-[10px] sm:text-[11px] font-bold tracking-wider text-slate-500 uppercase mt-1">DISTRICTS COVERED</div>
+                    <div className="font-emphasis text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-950">
+                      {SYSTEM_STATS.districtsCovered}
+                    </div>
+                    <div className="font-emphasis text-[10px] sm:text-[11px] font-bold tracking-wider text-slate-500 uppercase mt-1">
+                      DISTRICTS COVERED
+                    </div>
                   </div>
                   <div className="sm:pl-3">
-                    <div className="font-emphasis text-2xl sm:text-3xl font-extrabold tracking-tight text-blue-800">₹482.4 Cr</div>
-                    <div className="font-emphasis text-[10px] sm:text-[11px] font-bold tracking-wider text-slate-500 uppercase mt-1">SCRUTINIZED VALUE</div>
+                    <div className="font-emphasis text-2xl sm:text-3xl font-extrabold tracking-tight text-blue-800">
+                      {formatCurrency(SYSTEM_STATS.totalAllocated)}
+                    </div>
+                    <div className="font-emphasis text-[10px] sm:text-[11px] font-bold tracking-wider text-slate-500 uppercase mt-1">
+                      SCRUTINIZED VALUE
+                    </div>
                   </div>
                 </div>
               </div>
@@ -383,7 +399,7 @@ export default function OverviewLandingPage() {
                 {[
                   { title: "Cost Variance Engine", weight: "45%", desc: "Robust Z-score & IQR dispersion vs peer median", color: "border-amber-300 bg-amber-50/60 text-amber-800" },
                   { title: "Semantic DPR Matching", weight: "35%", desc: "Neural cosine text embeddings across sanction DPRs", color: "border-indigo-300 bg-indigo-50/60 text-indigo-800" },
-                  { title: "Geospatial & Clustering", weight: "20%", desc: "DBSCAN concentration & cross-scheme GIS overlap", color: "border-sky-300 bg-sky-50/60 text-sky-800" },
+                  { title: "Constituency & Vendor Clustering", weight: "20%", desc: "Entity concentration, vendor monopolies & cross-scheme overlap", color: "border-sky-300 bg-sky-50/60 text-sky-800" },
                 ].map((s) => (
                   <div key={s.title} className={`p-4 rounded-xl border ${s.color} space-y-1`}>
                     <div className="flex items-center justify-between">
@@ -420,7 +436,7 @@ export default function OverviewLandingPage() {
               Four Algorithmic Detection Pillars
             </h2>
             <p className="font-sans text-sm text-slate-600 mt-1 max-w-2xl">
-              ArthaSentinel synthesizes robust statistical baselines with deep text embeddings and geospatial verification to isolate anomalies without subjective bias.
+              ArthaSentinel synthesizes robust statistical baselines with deep text embeddings and administrative entity verification to isolate anomalies without subjective bias.
             </p>
           </div>
 
@@ -428,7 +444,7 @@ export default function OverviewLandingPage() {
             {[
               { num: "01", title: "Cost Variance Analysis", desc: "Evaluates unit cost metrics against statistically comparable peers using robust Z-scores and IQR bands.", note: "Benchmark: State PWD SoR & District Medians" },
               { num: "02", title: "Semantic Duplicate Detection", desc: "Neural sentence embeddings and cosine matching across DPRs to identify identical asset specifications.", note: "Threshold: >80% Textual Similarity" },
-              { num: "03", title: "Spatial Clustering", desc: "Haversine distance and DBSCAN to detect duplicate infrastructure and contractor monopolies.", note: "GIS Cross-Reference: JJM & PMGSY Assets" },
+              { num: "03", title: "Constituency & Vendor Clustering", desc: "Graph-based entity linking to detect contractor monopolies, repetitive agency awards, and cross-scheme duplicate assets.", note: "Cross-Reference: JJM, PMGSY & State PWD" },
               { num: "04", title: "Tender Splitting & Fiscal Clustering", desc: "Identifies sub-project splitting beneath committee thresholds and fiscal year-end sanction clusters.", note: "Model: Threshold Proximity & Timing" },
             ].map((p) => (
               <div key={p.num} className="rounded-2xl border border-slate-200 bg-white p-6 shadow-2xs space-y-3 hover:border-blue-300 transition-colors">

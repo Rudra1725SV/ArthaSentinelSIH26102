@@ -29,7 +29,8 @@ export default function WorksPage() {
           w.workId.toLowerCase().includes(q) ||
           w.description.toLowerCase().includes(q) ||
           w.constituency.toLowerCase().includes(q) ||
-          w.district.toLowerCase().includes(q)
+          w.district.toLowerCase().includes(q) ||
+          (w.mp_name && w.mp_name.toLowerCase().includes(q))
       );
     }
     result.sort((a, b) => {
@@ -66,7 +67,7 @@ export default function WorksPage() {
             </svg>
             <input
               type="text"
-              placeholder="Search by Work ID, description, constituency, district..."
+              placeholder="Search by Work ID, description, MP name, constituency, district..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-10 pr-4 py-2.5 font-sans text-sm bg-white border border-slate-200 rounded-xl focus:outline-hidden focus:ring-2 focus:ring-blue-600"
@@ -108,6 +109,7 @@ export default function WorksPage() {
                 <tr>
                   <th className="py-4 pl-6 pr-3">Work ID</th>
                   <th className="px-3 py-4">Description</th>
+                  <th className="px-3 py-4">Representative (MP)</th>
                   <th className="px-3 py-4">Constituency</th>
                   <th className="px-3 py-4">Category</th>
                   <th className="px-3 py-4 cursor-pointer select-none" onClick={() => toggleSort("sanctionedAmount")}>
@@ -131,6 +133,15 @@ export default function WorksPage() {
                       <Link href={`/investigations/${w.workId}`} className="font-sans font-semibold text-slate-900 hover:text-blue-700 line-clamp-1">
                         {w.description}
                       </Link>
+                    </td>
+                    <td className="px-3 py-4 text-xs font-sans">
+                      {w.mp_id ? (
+                        <Link href={`/mps/${w.mp_id}`} className="font-medium text-blue-700 hover:text-blue-900 hover:underline">
+                          {w.mp_name}
+                        </Link>
+                      ) : (
+                        <span className="text-slate-500">{w.mp_name || "Unassigned"}</span>
+                      )}
                     </td>
                     <td className="px-3 py-4 text-xs text-slate-700">
                       <div>{w.constituency}</div>

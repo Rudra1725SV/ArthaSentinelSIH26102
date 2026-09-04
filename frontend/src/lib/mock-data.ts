@@ -1,14 +1,43 @@
 // =============================================================================
-// ArthaSentinel V2.4 — Full Frontend Data Model
+// ArthaSentinel V2.4 — Full Frontend Data Model & Dataset-Driven Architecture
 // MPLADS Anomaly Detection & Investigation Platform (SIH26102)
 // =============================================================================
-// ALL DATA IS SYNTHETIC. Labels marked "demo" or "synthetic" where displayed.
+// ALL DATA IS SYNTHETIC SEED DATA.
+// The system is designed to dynamically accept external datasets (CSV/Excel/API)
+// without frontend code modifications. All rankings and KPIs are dynamically computed.
 // =============================================================================
 
-// ─── Core Types ──────────────────────────────────────────────────────────────
+// ─── Core MP Entity ──────────────────────────────────────────────────────────
+
+export interface MP {
+  mp_id: string;
+  name: string;
+  house: "Lok Sabha" | "Rajya Sabha";
+  constituency: string;
+  state: string;
+  district: string;
+  party: string;
+  tenure_start: string;
+  tenure_end: string;
+  works_count: number;
+  completed_works: number;
+  ongoing_works: number;
+  allocated_amount: number; // ₹
+  recorded_expenditure: number; // ₹
+  utilization_rate: number; // %
+  flagged_works: number;
+  high_risk_works: number;
+  anomaly_rate: number; // %
+  risk_score: number; // 0–100 composite
+  avatar_initials?: string;
+}
+
+// ─── Work Entity ─────────────────────────────────────────────────────────────
 
 export interface Work {
   workId: string;
+  mp_id: string;
+  mp_name: string;
   description: string;
   state: string;
   district: string;
@@ -22,8 +51,6 @@ export interface Work {
   riskScore: number;
   riskTier: "Low" | "Moderate" | "Elevated" | "Critical";
   anomalyTypes: AnomalyType[];
-  latitude: number;
-  longitude: number;
   financialYear: string;
   status: "Flagged" | "Triaged" | "Under Review" | "Escalated" | "Resolved" | "Dismissed";
   implementingAgency: string;
@@ -98,19 +125,57 @@ export interface AuditEvent {
   result: string;
 }
 
-export interface MapCluster {
-  id: string;
-  centerLat: number;
-  centerLng: number;
-  workIds: string[];
+// ─── Dynamic Dataset Metrics Calculator ──────────────────────────────────────
+
+export interface DatasetMetrics {
+  totalMPs: number;
   totalWorks: number;
-  flaggedCost: number;
-  highlySimilar: number;
-  underInvestigation: number;
-  label: string;
+  totalAllocated: number;
+  totalExpenditure: number;
+  overallUtilization: number;
+  averageUtilizationRate: number;
+  flaggedWorks: number;
+  highRiskWorks: number;
+  anomalyRate: number;
+  criticalMPs: number;
+  statesCovered: number;
+  districtsCovered: number;
+  worksIndexed: number;
+  flaggedThisCycle: number;
 }
 
-// ─── Helper Functions ────────────────────────────────────────────────────────
+export function calculateDatasetMetrics(mps: MP[], works: Work[]): DatasetMetrics {
+  const totalMPs = mps.length;
+  const totalWorks = works.length;
+  const totalAllocated = mps.reduce((acc, m) => acc + m.allocated_amount, 0);
+  const totalExpenditure = mps.reduce((acc, m) => acc + m.recorded_expenditure, 0);
+  const overallUtilization = totalAllocated > 0 ? Number(((totalExpenditure / totalAllocated) * 100).toFixed(1)) : 0;
+  const flaggedWorks = works.filter((w) => w.status === "Flagged" || w.status === "Under Review" || w.status === "Escalated").length;
+  const highRiskWorks = works.filter((w) => w.riskScore >= 70).length;
+  const anomalyRate = totalWorks > 0 ? Number(((flaggedWorks / totalWorks) * 100).toFixed(1)) : 0;
+  const criticalMPs = mps.filter((m) => m.risk_score >= 70).length;
+  const statesCovered = new Set(mps.map((m) => m.state)).size;
+  const districtsCovered = new Set(mps.map((m) => m.district)).size;
+
+  return {
+    totalMPs,
+    totalWorks,
+    totalAllocated,
+    totalExpenditure,
+    overallUtilization,
+    averageUtilizationRate: overallUtilization,
+    flaggedWorks,
+    highRiskWorks,
+    anomalyRate,
+    criticalMPs,
+    statesCovered,
+    districtsCovered,
+    worksIndexed: totalWorks,
+    flaggedThisCycle: flaggedWorks,
+  };
+}
+
+// ─── Format Helpers ──────────────────────────────────────────────────────────
 
 export function formatCurrency(val: number): string {
   if (val >= 10000000) return "₹" + (val / 10000000).toFixed(2) + " Cr";
@@ -143,41 +208,547 @@ export function getRiskTier(score: number): Work["riskTier"] {
   return "Low";
 }
 
-export function getWorkById(id: string): Work | undefined {
-  return WORKS.find((w) => w.workId === id);
-}
+// ─── Seed MP Dataset (Representative, Scalable) ──────────────────────────────
 
-export function getInvestigationByWorkId(workId: string): Investigation | undefined {
-  return INVESTIGATIONS.find((inv) => inv.workId === workId);
-}
+export const SEED_MPS: MP[] = [
+  {
+    mp_id: "MP-MP-01",
+    name: "Alok Kumar Verma",
+    house: "Lok Sabha",
+    constituency: "Bhopal Parliamentary",
+    state: "Madhya Pradesh",
+    district: "Sehore",
+    party: "BJP",
+    tenure_start: "2024",
+    tenure_end: "2029",
+    works_count: 58,
+    completed_works: 32,
+    ongoing_works: 26,
+    allocated_amount: 250000000,
+    recorded_expenditure: 218000000,
+    utilization_rate: 87.2,
+    flagged_works: 7,
+    high_risk_works: 3,
+    anomaly_rate: 12.1,
+    risk_score: 87,
+    avatar_initials: "AV",
+  },
+  {
+    mp_id: "MP-UP-01",
+    name: "Virendra Singh",
+    house: "Lok Sabha",
+    constituency: "Varanasi Parliamentary",
+    state: "Uttar Pradesh",
+    district: "Varanasi",
+    party: "BJP",
+    tenure_start: "2024",
+    tenure_end: "2029",
+    works_count: 72,
+    completed_works: 44,
+    ongoing_works: 28,
+    allocated_amount: 250000000,
+    recorded_expenditure: 234000000,
+    utilization_rate: 93.6,
+    flagged_works: 5,
+    high_risk_works: 2,
+    anomaly_rate: 6.9,
+    risk_score: 81,
+    avatar_initials: "VS",
+  },
+  {
+    mp_id: "MP-TN-01",
+    name: "K. Navaskani",
+    house: "Lok Sabha",
+    constituency: "Ramanathapuram Parliamentary",
+    state: "Tamil Nadu",
+    district: "Ramanathapuram",
+    party: "IUML",
+    tenure_start: "2024",
+    tenure_end: "2029",
+    works_count: 46,
+    completed_works: 24,
+    ongoing_works: 22,
+    allocated_amount: 250000000,
+    recorded_expenditure: 198000000,
+    utilization_rate: 79.2,
+    flagged_works: 4,
+    high_risk_works: 2,
+    anomaly_rate: 8.7,
+    risk_score: 85,
+    avatar_initials: "KN",
+  },
+  {
+    mp_id: "MP-MP-02",
+    name: "Shankar Lalwani",
+    house: "Lok Sabha",
+    constituency: "Indore Lok Sabha",
+    state: "Madhya Pradesh",
+    district: "Indore",
+    party: "BJP",
+    tenure_start: "2024",
+    tenure_end: "2029",
+    works_count: 64,
+    completed_works: 41,
+    ongoing_works: 23,
+    allocated_amount: 250000000,
+    recorded_expenditure: 225000000,
+    utilization_rate: 90.0,
+    flagged_works: 4,
+    high_risk_works: 1,
+    anomaly_rate: 6.3,
+    risk_score: 76,
+    avatar_initials: "SL",
+  },
+  {
+    mp_id: "MP-RJ-01",
+    name: "Rao Rajendra Singh",
+    house: "Lok Sabha",
+    constituency: "Jaipur Rural",
+    state: "Rajasthan",
+    district: "Jaipur",
+    party: "BJP",
+    tenure_start: "2024",
+    tenure_end: "2029",
+    works_count: 51,
+    completed_works: 30,
+    ongoing_works: 21,
+    allocated_amount: 250000000,
+    recorded_expenditure: 205000000,
+    utilization_rate: 82.0,
+    flagged_works: 5,
+    high_risk_works: 1,
+    anomaly_rate: 9.8,
+    risk_score: 72,
+    avatar_initials: "RS",
+  },
+  {
+    mp_id: "MP-WB-01",
+    name: "Mala Roy",
+    house: "Lok Sabha",
+    constituency: "Kolkata South",
+    state: "West Bengal",
+    district: "Kolkata",
+    party: "AITC",
+    tenure_start: "2024",
+    tenure_end: "2029",
+    works_count: 62,
+    completed_works: 38,
+    ongoing_works: 24,
+    allocated_amount: 250000000,
+    recorded_expenditure: 212000000,
+    utilization_rate: 84.8,
+    flagged_works: 4,
+    high_risk_works: 1,
+    anomaly_rate: 6.5,
+    risk_score: 71,
+    avatar_initials: "MR",
+  },
+  {
+    mp_id: "MP-BR-01",
+    name: "Ravi Shankar Prasad",
+    house: "Lok Sabha",
+    constituency: "Patna Sahib",
+    state: "Bihar",
+    district: "Patna",
+    party: "BJP",
+    tenure_start: "2024",
+    tenure_end: "2029",
+    works_count: 59,
+    completed_works: 35,
+    ongoing_works: 24,
+    allocated_amount: 250000000,
+    recorded_expenditure: 219000000,
+    utilization_rate: 87.6,
+    flagged_works: 4,
+    high_risk_works: 1,
+    anomaly_rate: 6.8,
+    risk_score: 69,
+    avatar_initials: "RP",
+  },
+  {
+    mp_id: "MP-AP-01",
+    name: "M. Sribharat",
+    house: "Lok Sabha",
+    constituency: "Visakhapatnam Parliamentary",
+    state: "Andhra Pradesh",
+    district: "Visakhapatnam",
+    party: "TDP",
+    tenure_start: "2024",
+    tenure_end: "2029",
+    works_count: 48,
+    completed_works: 28,
+    ongoing_works: 20,
+    allocated_amount: 250000000,
+    recorded_expenditure: 201000000,
+    utilization_rate: 80.4,
+    flagged_works: 3,
+    high_risk_works: 1,
+    anomaly_rate: 6.2,
+    risk_score: 74,
+    avatar_initials: "MS",
+  },
+  {
+    mp_id: "MP-TN-02",
+    name: "Dayanidhi Maran",
+    house: "Lok Sabha",
+    constituency: "Chennai Central",
+    state: "Tamil Nadu",
+    district: "Chennai",
+    party: "DMK",
+    tenure_start: "2024",
+    tenure_end: "2029",
+    works_count: 55,
+    completed_works: 40,
+    ongoing_works: 15,
+    allocated_amount: 250000000,
+    recorded_expenditure: 231000000,
+    utilization_rate: 92.4,
+    flagged_works: 2,
+    high_risk_works: 0,
+    anomaly_rate: 3.6,
+    risk_score: 55,
+    avatar_initials: "DM",
+  },
+  {
+    mp_id: "MP-TG-01",
+    name: "Asaduddin Owaisi",
+    house: "Lok Sabha",
+    constituency: "Hyderabad Parliamentary",
+    state: "Telangana",
+    district: "Hyderabad",
+    party: "AIMIM",
+    tenure_start: "2024",
+    tenure_end: "2029",
+    works_count: 68,
+    completed_works: 48,
+    ongoing_works: 20,
+    allocated_amount: 250000000,
+    recorded_expenditure: 240000000,
+    utilization_rate: 96.0,
+    flagged_works: 2,
+    high_risk_works: 0,
+    anomaly_rate: 2.9,
+    risk_score: 48,
+    avatar_initials: "AO",
+  },
+  {
+    mp_id: "MP-KA-01",
+    name: "P. C. Mohan",
+    house: "Lok Sabha",
+    constituency: "Bangalore Central",
+    state: "Karnataka",
+    district: "Bengaluru Urban",
+    party: "BJP",
+    tenure_start: "2024",
+    tenure_end: "2029",
+    works_count: 53,
+    completed_works: 37,
+    ongoing_works: 16,
+    allocated_amount: 250000000,
+    recorded_expenditure: 228000000,
+    utilization_rate: 91.2,
+    flagged_works: 2,
+    high_risk_works: 0,
+    anomaly_rate: 3.8,
+    risk_score: 42,
+    avatar_initials: "PM",
+  },
+  {
+    mp_id: "MP-HR-01",
+    name: "Rao Inderjit Singh",
+    house: "Lok Sabha",
+    constituency: "Gurugram Parliamentary",
+    state: "Haryana",
+    district: "Gurugram",
+    party: "BJP",
+    tenure_start: "2024",
+    tenure_end: "2029",
+    works_count: 60,
+    completed_works: 45,
+    ongoing_works: 15,
+    allocated_amount: 250000000,
+    recorded_expenditure: 236000000,
+    utilization_rate: 94.4,
+    flagged_works: 1,
+    high_risk_works: 0,
+    anomaly_rate: 1.7,
+    risk_score: 38,
+    avatar_initials: "IS",
+  },
+  {
+    mp_id: "MP-MH-01",
+    name: "Murlidhar Mohol",
+    house: "Lok Sabha",
+    constituency: "Pune Parliamentary",
+    state: "Maharashtra",
+    district: "Pune",
+    party: "BJP",
+    tenure_start: "2024",
+    tenure_end: "2029",
+    works_count: 49,
+    completed_works: 39,
+    ongoing_works: 10,
+    allocated_amount: 250000000,
+    recorded_expenditure: 238000000,
+    utilization_rate: 95.2,
+    flagged_works: 1,
+    high_risk_works: 0,
+    anomaly_rate: 2.0,
+    risk_score: 34,
+    avatar_initials: "MM",
+  },
+  {
+    mp_id: "MP-OD-01",
+    name: "Aparajita Sarangi",
+    house: "Lok Sabha",
+    constituency: "Bhubaneswar Parliamentary",
+    state: "Odisha",
+    district: "Bhubaneswar",
+    party: "BJP",
+    tenure_start: "2024",
+    tenure_end: "2029",
+    works_count: 66,
+    completed_works: 52,
+    ongoing_works: 14,
+    allocated_amount: 250000000,
+    recorded_expenditure: 242000000,
+    utilization_rate: 96.8,
+    flagged_works: 0,
+    high_risk_works: 0,
+    anomaly_rate: 0.0,
+    risk_score: 28,
+    avatar_initials: "AS",
+  },
+  {
+    mp_id: "MP-RJ-02",
+    name: "Gajendra Singh Shekhawat",
+    house: "Lok Sabha",
+    constituency: "Jodhpur Parliamentary",
+    state: "Rajasthan",
+    district: "Jodhpur",
+    party: "BJP",
+    tenure_start: "2024",
+    tenure_end: "2029",
+    works_count: 54,
+    completed_works: 46,
+    ongoing_works: 8,
+    allocated_amount: 250000000,
+    recorded_expenditure: 245000000,
+    utilization_rate: 98.0,
+    flagged_works: 0,
+    high_risk_works: 0,
+    anomaly_rate: 0.0,
+    risk_score: 25,
+    avatar_initials: "GS",
+  },
+  {
+    mp_id: "MP-GJ-01",
+    name: "Hasmukh Patel",
+    house: "Lok Sabha",
+    constituency: "Ahmedabad East",
+    state: "Gujarat",
+    district: "Ahmedabad",
+    party: "BJP",
+    tenure_start: "2024",
+    tenure_end: "2029",
+    works_count: 61,
+    completed_works: 53,
+    ongoing_works: 8,
+    allocated_amount: 250000000,
+    recorded_expenditure: 247000000,
+    utilization_rate: 98.8,
+    flagged_works: 0,
+    high_risk_works: 0,
+    anomaly_rate: 0.0,
+    risk_score: 22,
+    avatar_initials: "HP",
+  },
+  {
+    mp_id: "MP-KL-01",
+    name: "Dr. Shashi Tharoor",
+    house: "Lok Sabha",
+    constituency: "Thiruvananthapuram Parliamentary",
+    state: "Kerala",
+    district: "Thiruvananthapuram",
+    party: "INC",
+    tenure_start: "2024",
+    tenure_end: "2029",
+    works_count: 70,
+    completed_works: 62,
+    ongoing_works: 8,
+    allocated_amount: 250000000,
+    recorded_expenditure: 248000000,
+    utilization_rate: 99.2,
+    flagged_works: 0,
+    high_risk_works: 0,
+    anomaly_rate: 0.0,
+    risk_score: 18,
+    avatar_initials: "ST",
+  },
+  // Rajya Sabha representatives
+  {
+    mp_id: "MP-RS-01",
+    name: "Jairam Ramesh",
+    house: "Rajya Sabha",
+    constituency: "Karnataka (Statewide)",
+    state: "Karnataka",
+    district: "Bengaluru",
+    party: "INC",
+    tenure_start: "2022",
+    tenure_end: "2028",
+    works_count: 38,
+    completed_works: 29,
+    ongoing_works: 9,
+    allocated_amount: 250000000,
+    recorded_expenditure: 220000000,
+    utilization_rate: 88.0,
+    flagged_works: 1,
+    high_risk_works: 0,
+    anomaly_rate: 2.6,
+    risk_score: 32,
+    avatar_initials: "JR",
+  },
+  {
+    mp_id: "MP-RS-02",
+    name: "Sanjay Raut",
+    house: "Rajya Sabha",
+    constituency: "Maharashtra (Statewide)",
+    state: "Maharashtra",
+    district: "Mumbai",
+    party: "SS(UBT)",
+    tenure_start: "2022",
+    tenure_end: "2028",
+    works_count: 42,
+    completed_works: 31,
+    ongoing_works: 11,
+    allocated_amount: 250000000,
+    recorded_expenditure: 215000000,
+    utilization_rate: 86.0,
+    flagged_works: 2,
+    high_risk_works: 0,
+    anomaly_rate: 4.8,
+    risk_score: 45,
+    avatar_initials: "SR",
+  },
+  {
+    mp_id: "MP-RS-03",
+    name: "Sarbananda Sonowal",
+    house: "Rajya Sabha",
+    constituency: "Assam (Statewide)",
+    state: "Assam",
+    district: "Dibrugarh",
+    party: "BJP",
+    tenure_start: "2021",
+    tenure_end: "2027",
+    works_count: 45,
+    completed_works: 33,
+    ongoing_works: 12,
+    allocated_amount: 250000000,
+    recorded_expenditure: 222000000,
+    utilization_rate: 88.8,
+    flagged_works: 1,
+    high_risk_works: 0,
+    anomaly_rate: 2.2,
+    risk_score: 29,
+    avatar_initials: "SS",
+  },
+  {
+    mp_id: "MP-RS-04",
+    name: "K. Keshava Rao",
+    house: "Rajya Sabha",
+    constituency: "Telangana (Statewide)",
+    state: "Telangana",
+    district: "Hyderabad",
+    party: "INC",
+    tenure_start: "2020",
+    tenure_end: "2026",
+    works_count: 36,
+    completed_works: 28,
+    ongoing_works: 8,
+    allocated_amount: 250000000,
+    recorded_expenditure: 218000000,
+    utilization_rate: 87.2,
+    flagged_works: 1,
+    high_risk_works: 0,
+    anomaly_rate: 2.8,
+    risk_score: 35,
+    avatar_initials: "KR",
+  },
+  {
+    mp_id: "MP-RS-05",
+    name: "Manoj Kumar Jha",
+    house: "Rajya Sabha",
+    constituency: "Bihar (Statewide)",
+    state: "Bihar",
+    district: "Patna",
+    party: "RJD",
+    tenure_start: "2024",
+    tenure_end: "2030",
+    works_count: 31,
+    completed_works: 22,
+    ongoing_works: 9,
+    allocated_amount: 250000000,
+    recorded_expenditure: 195000000,
+    utilization_rate: 78.0,
+    flagged_works: 2,
+    high_risk_works: 0,
+    anomaly_rate: 6.5,
+    risk_score: 44,
+    avatar_initials: "MJ",
+  },
+  {
+    mp_id: "MP-UP-02",
+    name: "Rajnath Singh",
+    house: "Lok Sabha",
+    constituency: "Lucknow Parliamentary",
+    state: "Uttar Pradesh",
+    district: "Lucknow",
+    party: "BJP",
+    tenure_start: "2024",
+    tenure_end: "2029",
+    works_count: 75,
+    completed_works: 58,
+    ongoing_works: 17,
+    allocated_amount: 250000000,
+    recorded_expenditure: 244000000,
+    utilization_rate: 97.6,
+    flagged_works: 2,
+    high_risk_works: 0,
+    anomaly_rate: 2.7,
+    risk_score: 45,
+    avatar_initials: "RS",
+  },
+  {
+    mp_id: "MP-PB-01",
+    name: "Gurjeet Singh Aujla",
+    house: "Lok Sabha",
+    constituency: "Amritsar Parliamentary",
+    state: "Punjab",
+    district: "Amritsar",
+    party: "INC",
+    tenure_start: "2024",
+    tenure_end: "2029",
+    works_count: 52,
+    completed_works: 36,
+    ongoing_works: 16,
+    allocated_amount: 250000000,
+    recorded_expenditure: 214000000,
+    utilization_rate: 85.6,
+    flagged_works: 3,
+    high_risk_works: 0,
+    anomaly_rate: 5.8,
+    risk_score: 52,
+    avatar_initials: "GA",
+  },
+];
 
-export function getRelatedWorks(workId: string): RelatedWork[] {
-  return RELATED_WORKS.filter((r) => r.workId === workId);
-}
-
-export function getInvestigationsByStatus(status?: string): Investigation[] {
-  if (!status || status === "ALL") return INVESTIGATIONS;
-  return INVESTIGATIONS.filter((inv) => inv.status === status);
-}
-
-// ─── System Stats ────────────────────────────────────────────────────────────
-
-export const SYSTEM_STATS = {
-  totalWorksAnalyzed: 10482,
-  potentialAnomalies: 247,
-  highRisk: 38,
-  priorityInvestigations: 12,
-  districtsCovered: 36,
-  statesCovered: 8,
-  flaggedThisCycle: 14,
-  worksIndexed: 1248320,
-};
-
-// ─── Works Dataset (20+ realistic MPLADS entries) ────────────────────────────
+// ─── Works Dataset (Linked to MP entities) ───────────────────────────────────
 
 export const WORKS: Work[] = [
   {
     workId: "MPL-48291",
+    mp_id: "MP-MP-01",
+    mp_name: "Alok Kumar Verma",
     description: "Construction of Multi-Purpose Community Hall & Solar Microgrid",
     state: "Madhya Pradesh",
     district: "Sehore",
@@ -191,8 +762,6 @@ export const WORKS: Work[] = [
     riskScore: 87,
     riskTier: "Critical",
     anomalyTypes: ["cost", "semantic"],
-    latitude: 23.2032,
-    longitude: 77.0844,
     financialYear: "2024-25",
     status: "Flagged",
     implementingAgency: "M/s Apex Rural Infra Projects Ltd",
@@ -203,6 +772,8 @@ export const WORKS: Work[] = [
   },
   {
     workId: "MPL-38192",
+    mp_id: "MP-MP-01",
+    mp_name: "Alok Kumar Verma",
     description: "Construction of Community Centre with Integrated Training Facility",
     state: "Madhya Pradesh",
     district: "Sehore",
@@ -216,8 +787,6 @@ export const WORKS: Work[] = [
     riskScore: 82,
     riskTier: "Critical",
     anomalyTypes: ["cost", "semantic", "geographic"],
-    latitude: 23.1879,
-    longitude: 77.0756,
     financialYear: "2024-25",
     status: "Under Review",
     implementingAgency: "M/s Apex Rural Infra Projects Ltd",
@@ -228,6 +797,8 @@ export const WORKS: Work[] = [
   },
   {
     workId: "MPL-72819",
+    mp_id: "MP-RJ-01",
+    mp_name: "Rao Rajendra Singh",
     description: "Upgradation of Rural Link Road with Cement Concrete Pavement",
     state: "Rajasthan",
     district: "Jaipur",
@@ -241,8 +812,6 @@ export const WORKS: Work[] = [
     riskScore: 72,
     riskTier: "Elevated",
     anomalyTypes: ["geographic", "pattern"],
-    latitude: 26.9855,
-    longitude: 75.8513,
     financialYear: "2024-25",
     status: "Flagged",
     implementingAgency: "National Tech Buildcon",
@@ -253,6 +822,8 @@ export const WORKS: Work[] = [
   },
   {
     workId: "MPL-91024",
+    mp_id: "MP-MP-02",
+    mp_name: "Shankar Lalwani",
     description: "Installation of 240W LED High-Mast Solar Lighting Systems, Ward 12 & 14",
     state: "Madhya Pradesh",
     district: "Indore",
@@ -266,8 +837,6 @@ export const WORKS: Work[] = [
     riskScore: 76,
     riskTier: "Elevated",
     anomalyTypes: ["cost", "pattern"],
-    latitude: 22.7196,
-    longitude: 75.8577,
     financialYear: "2024-25",
     status: "Triaged",
     implementingAgency: "Shree Balaji Infra Solutions",
@@ -278,6 +847,8 @@ export const WORKS: Work[] = [
   },
   {
     workId: "MPL-55301",
+    mp_id: "MP-UP-01",
+    mp_name: "Virendra Singh",
     description: "Deep Borewell Drilling & Community RO Water Purification Network",
     state: "Uttar Pradesh",
     district: "Varanasi",
@@ -291,8 +862,6 @@ export const WORKS: Work[] = [
     riskScore: 81,
     riskTier: "Critical",
     anomalyTypes: ["cost", "semantic", "geographic"],
-    latitude: 25.3176,
-    longitude: 82.9739,
     financialYear: "2024-25",
     status: "Escalated",
     implementingAgency: "Vanguard Infra Services Pvt Ltd",
@@ -303,6 +872,8 @@ export const WORKS: Work[] = [
   },
   {
     workId: "MPL-63218",
+    mp_id: "MP-TN-01",
+    mp_name: "K. Navaskani",
     description: "Procurement and Installation of Desalination RO Plant, Rameswaram Coast",
     state: "Tamil Nadu",
     district: "Ramanathapuram",
@@ -316,8 +887,6 @@ export const WORKS: Work[] = [
     riskScore: 85,
     riskTier: "Critical",
     anomalyTypes: ["cost", "semantic"],
-    latitude: 9.2876,
-    longitude: 79.3129,
     financialYear: "2024-25",
     status: "Flagged",
     implementingAgency: "Southern Oceanics & Infra Ltd",
@@ -328,6 +897,8 @@ export const WORKS: Work[] = [
   },
   {
     workId: "MPL-18402",
+    mp_id: "MP-KL-01",
+    mp_name: "Dr. Shashi Tharoor",
     description: "Construction of Anganwadi Center with Nutrition Storage, Kazhakoottam",
     state: "Kerala",
     district: "Thiruvananthapuram",
@@ -341,8 +912,6 @@ export const WORKS: Work[] = [
     riskScore: 18,
     riskTier: "Low",
     anomalyTypes: [],
-    latitude: 8.5686,
-    longitude: 76.8731,
     financialYear: "2024-25",
     status: "Resolved",
     implementingAgency: "Kerala State Coastal Construction Corp",
@@ -353,6 +922,8 @@ export const WORKS: Work[] = [
   },
   {
     workId: "MPL-29104",
+    mp_id: "MP-GJ-01",
+    mp_name: "Hasmukh Patel",
     description: "Solar Panel Installation for Government Primary School",
     state: "Gujarat",
     district: "Ahmedabad",
@@ -366,8 +937,6 @@ export const WORKS: Work[] = [
     riskScore: 22,
     riskTier: "Low",
     anomalyTypes: [],
-    latitude: 23.0225,
-    longitude: 72.5714,
     financialYear: "2023-24",
     status: "Resolved",
     implementingAgency: "Gujarat Solar Corp",
@@ -378,6 +947,8 @@ export const WORKS: Work[] = [
   },
   {
     workId: "MPL-44810",
+    mp_id: "MP-MH-01",
+    mp_name: "Murlidhar Mohol",
     description: "Construction of Public Library and Digital Resource Center",
     state: "Maharashtra",
     district: "Pune",
@@ -391,8 +962,6 @@ export const WORKS: Work[] = [
     riskScore: 34,
     riskTier: "Moderate",
     anomalyTypes: ["pattern"],
-    latitude: 18.5204,
-    longitude: 73.8567,
     financialYear: "2024-25",
     status: "Dismissed",
     implementingAgency: "Pune Municipal Works",
@@ -403,6 +972,8 @@ export const WORKS: Work[] = [
   },
   {
     workId: "MPL-50192",
+    mp_id: "MP-KA-01",
+    mp_name: "P. C. Mohan",
     description: "Renovation of Government Hospital Ward & ICU Equipment",
     state: "Karnataka",
     district: "Bengaluru Urban",
@@ -416,8 +987,6 @@ export const WORKS: Work[] = [
     riskScore: 42,
     riskTier: "Moderate",
     anomalyTypes: ["cost"],
-    latitude: 12.9716,
-    longitude: 77.5946,
     financialYear: "2024-25",
     status: "Triaged",
     implementingAgency: "KHD Infrastructure",
@@ -428,6 +997,8 @@ export const WORKS: Work[] = [
   },
   {
     workId: "MPL-67201",
+    mp_id: "MP-WB-01",
+    mp_name: "Mala Roy",
     description: "Construction of Covered Drain and Sewage Treatment Unit",
     state: "West Bengal",
     district: "Kolkata",
@@ -441,8 +1012,6 @@ export const WORKS: Work[] = [
     riskScore: 71,
     riskTier: "Elevated",
     anomalyTypes: ["cost", "pattern"],
-    latitude: 22.5726,
-    longitude: 88.3639,
     financialYear: "2024-25",
     status: "Under Review",
     implementingAgency: "Bengal Civil Works Ltd",
@@ -453,6 +1022,8 @@ export const WORKS: Work[] = [
   },
   {
     workId: "MPL-81039",
+    mp_id: "MP-HR-01",
+    mp_name: "Rao Inderjit Singh",
     description: "Village Playground and Open Gymnasium Equipment Installation",
     state: "Haryana",
     district: "Gurugram",
@@ -466,8 +1037,6 @@ export const WORKS: Work[] = [
     riskScore: 38,
     riskTier: "Moderate",
     anomalyTypes: ["cost"],
-    latitude: 28.4595,
-    longitude: 77.0266,
     financialYear: "2023-24",
     status: "Resolved",
     implementingAgency: "Haryana Rural Dev Board",
@@ -478,6 +1047,8 @@ export const WORKS: Work[] = [
   },
   {
     workId: "MPL-92104",
+    mp_id: "MP-MP-01",
+    mp_name: "Alok Kumar Verma",
     description: "Bus Shelter Construction with Solar Powered Lighting",
     state: "Madhya Pradesh",
     district: "Sehore",
@@ -491,8 +1062,6 @@ export const WORKS: Work[] = [
     riskScore: 78,
     riskTier: "Elevated",
     anomalyTypes: ["cost", "geographic"],
-    latitude: 23.1950,
-    longitude: 77.0900,
     financialYear: "2024-25",
     status: "Flagged",
     implementingAgency: "M/s Apex Rural Infra Projects Ltd",
@@ -503,6 +1072,8 @@ export const WORKS: Work[] = [
   },
   {
     workId: "MPL-33019",
+    mp_id: "MP-BR-01",
+    mp_name: "Ravi Shankar Prasad",
     description: "Gram Panchayat Bhawan Construction with Meeting Hall",
     state: "Bihar",
     district: "Patna",
@@ -516,8 +1087,6 @@ export const WORKS: Work[] = [
     riskScore: 69,
     riskTier: "Elevated",
     anomalyTypes: ["cost", "semantic"],
-    latitude: 25.6093,
-    longitude: 85.1376,
     financialYear: "2024-25",
     status: "Triaged",
     implementingAgency: "Bihar Construction Corp",
@@ -528,6 +1097,8 @@ export const WORKS: Work[] = [
   },
   {
     workId: "MPL-77502",
+    mp_id: "MP-UP-02",
+    mp_name: "Rajnath Singh",
     description: "Footbridge Over Canal with Approach Road",
     state: "Uttar Pradesh",
     district: "Lucknow",
@@ -541,8 +1112,6 @@ export const WORKS: Work[] = [
     riskScore: 45,
     riskTier: "Moderate",
     anomalyTypes: ["pattern"],
-    latitude: 26.8467,
-    longitude: 80.9462,
     financialYear: "2023-24",
     status: "Dismissed",
     implementingAgency: "UP PWD Div-II",
@@ -553,6 +1122,8 @@ export const WORKS: Work[] = [
   },
   {
     workId: "MPL-10284",
+    mp_id: "MP-AP-01",
+    mp_name: "M. Sribharat",
     description: "Construction of SC/ST Community Welfare Center",
     state: "Andhra Pradesh",
     district: "Visakhapatnam",
@@ -566,8 +1137,6 @@ export const WORKS: Work[] = [
     riskScore: 74,
     riskTier: "Elevated",
     anomalyTypes: ["cost", "geographic"],
-    latitude: 17.6868,
-    longitude: 83.2185,
     financialYear: "2024-25",
     status: "Under Review",
     implementingAgency: "AP Rural Works Dept",
@@ -578,6 +1147,8 @@ export const WORKS: Work[] = [
   },
   {
     workId: "MPL-85410",
+    mp_id: "MP-OD-01",
+    mp_name: "Aparajita Sarangi",
     description: "Public Toilet Complex with Biogas Plant",
     state: "Odisha",
     district: "Bhubaneswar",
@@ -591,8 +1162,6 @@ export const WORKS: Work[] = [
     riskScore: 28,
     riskTier: "Low",
     anomalyTypes: [],
-    latitude: 20.2961,
-    longitude: 85.8245,
     financialYear: "2023-24",
     status: "Resolved",
     implementingAgency: "Odisha Municipal Corp",
@@ -603,6 +1172,8 @@ export const WORKS: Work[] = [
   },
   {
     workId: "MPL-42199",
+    mp_id: "MP-TN-02",
+    mp_name: "Dayanidhi Maran",
     description: "Boundary Wall and Gate Construction for Govt Higher Secondary School",
     state: "Tamil Nadu",
     district: "Chennai",
@@ -616,8 +1187,6 @@ export const WORKS: Work[] = [
     riskScore: 55,
     riskTier: "Moderate",
     anomalyTypes: ["cost"],
-    latitude: 13.0827,
-    longitude: 80.2707,
     financialYear: "2024-25",
     status: "Triaged",
     implementingAgency: "Chennai Corp Eng Dept",
@@ -628,6 +1197,8 @@ export const WORKS: Work[] = [
   },
   {
     workId: "MPL-59820",
+    mp_id: "MP-TG-01",
+    mp_name: "Asaduddin Owaisi",
     description: "Installation of CCTV Surveillance System at Market Complex",
     state: "Telangana",
     district: "Hyderabad",
@@ -641,8 +1212,6 @@ export const WORKS: Work[] = [
     riskScore: 48,
     riskTier: "Moderate",
     anomalyTypes: ["cost", "pattern"],
-    latitude: 17.3850,
-    longitude: 78.4867,
     financialYear: "2024-25",
     status: "Flagged",
     implementingAgency: "Hyderabad Smart City SPV",
@@ -653,6 +1222,8 @@ export const WORKS: Work[] = [
   },
   {
     workId: "MPL-15903",
+    mp_id: "MP-RJ-02",
+    mp_name: "Gajendra Singh Shekhawat",
     description: "Cremation Ground Upgradation with Shed and Water Facility",
     state: "Rajasthan",
     district: "Jodhpur",
@@ -666,8 +1237,6 @@ export const WORKS: Work[] = [
     riskScore: 25,
     riskTier: "Low",
     anomalyTypes: [],
-    latitude: 26.2389,
-    longitude: 73.0243,
     financialYear: "2023-24",
     status: "Resolved",
     implementingAgency: "Jodhpur Nagar Nigam",
@@ -678,7 +1247,33 @@ export const WORKS: Work[] = [
   },
 ];
 
-// ─── Investigations (linked to flagged/active works) ─────────────────────────
+// ─── Dynamic Aggregation for Active Dataset ──────────────────────────────────
+
+export const SYSTEM_STATS = calculateDatasetMetrics(SEED_MPS, WORKS);
+
+// ─── Query Functions ─────────────────────────────────────────────────────────
+
+export function getWorkById(id: string): Work | undefined {
+  return WORKS.find((w) => w.workId === id);
+}
+
+export function getMPById(id: string): MP | undefined {
+  return SEED_MPS.find((m) => m.mp_id === id);
+}
+
+export function getWorksByMPId(mpId: string): Work[] {
+  return WORKS.filter((w) => w.mp_id === mpId);
+}
+
+export function getInvestigationByWorkId(workId: string): Investigation | undefined {
+  return INVESTIGATIONS.find((inv) => inv.workId === workId);
+}
+
+export function getRelatedWorks(workId: string): RelatedWork[] {
+  return RELATED_WORKS.filter((r) => r.workId === workId);
+}
+
+// ─── Investigations ──────────────────────────────────────────────────────────
 
 export const INVESTIGATIONS: Investigation[] = [
   {
@@ -717,7 +1312,7 @@ export const INVESTIGATIONS: Investigation[] = [
     radarMetrics: [
       { dimension: "Cost Deviation", thisWork: 92, peerBaseline: 30 },
       { dimension: "Semantic Overlap", thisWork: 87, peerBaseline: 20 },
-      { dimension: "Spatial Clustering", thisWork: 78, peerBaseline: 25 },
+      { dimension: "Constituency Clust.", thisWork: 78, peerBaseline: 25 },
       { dimension: "Vendor Concentration", thisWork: 85, peerBaseline: 35 },
       { dimension: "Timeline Compression", thisWork: 74, peerBaseline: 40 },
     ],
@@ -740,7 +1335,7 @@ export const INVESTIGATIONS: Investigation[] = [
     anomalyFlags: [
       { type: "semantic", severity: "critical", title: "Potential Duplicate Work", summary: "Near-identical milestone descriptions to MPL-48291, sanctioned 14 days apart.", metric: "92% semantic match", peerComparison: "Same agency, adjacent block." },
       { type: "cost", severity: "elevated", title: "Cost Above Peer Median", summary: "Sanctioned amount exceeds comparable works.", metric: "+171%", peerComparison: "Peer median: ₹17.0L vs Sanctioned: ₹46.0L" },
-      { type: "geographic", severity: "moderate", title: "Spatial Proximity", summary: "Located 1.8km from MPL-48291 with same contractor.", metric: "1.8km distance", peerComparison: "Same constituency cluster." },
+      { type: "geographic", severity: "moderate", title: "Constituency Proximity", summary: "Located in same Gram Panchayat block with same contractor.", metric: "Adjacent block", peerComparison: "Same constituency cluster." },
     ],
     peerDistribution: [
       { label: "P10", amount: 1200000 },
@@ -753,7 +1348,7 @@ export const INVESTIGATIONS: Investigation[] = [
     radarMetrics: [
       { dimension: "Cost Deviation", thisWork: 88, peerBaseline: 30 },
       { dimension: "Semantic Overlap", thisWork: 92, peerBaseline: 20 },
-      { dimension: "Spatial Clustering", thisWork: 72, peerBaseline: 25 },
+      { dimension: "Constituency Clust.", thisWork: 72, peerBaseline: 25 },
       { dimension: "Vendor Concentration", thisWork: 85, peerBaseline: 35 },
       { dimension: "Timeline Compression", thisWork: 68, peerBaseline: 40 },
     ],
@@ -764,7 +1359,7 @@ export const INVESTIGATIONS: Investigation[] = [
     riskScore: 72,
     status: "Flagged",
     assignedTo: "Unassigned",
-    primarySignal: "Geographic outlier — cluster of 5 road works near FY boundary",
+    primarySignal: "Tender splitting pattern — 5 road works below ₹40L committee threshold",
     notes: [],
     evidence: [
       { id: "e4", type: "calculation", title: "Tender Splitting Analysis", description: "5 road segments sanctioned at ₹37.5L–₹39.5L, all below ₹40L committee threshold.", addedAt: "2026-09-02T17:00:00", addedBy: "System" },
@@ -773,7 +1368,7 @@ export const INVESTIGATIONS: Investigation[] = [
       { id: "t8", timestamp: "2026-09-02T17:00:00", actor: "ArthaSentinel V2.4", actorType: "system", action: "Anomaly detected", object: "MPL-72819", result: "Tender splitting pattern near threshold." },
     ],
     anomalyFlags: [
-      { type: "geographic", severity: "elevated", title: "Geographic Concentration", summary: "5 similar road works within 8.5km corridor, all sanctioned within 3 weeks.", metric: "8.5km cluster", peerComparison: "Regional norm: 1.2 works per 10km." },
+      { type: "geographic", severity: "elevated", title: "Constituency Concentration", summary: "5 similar road works within same corridor, all sanctioned within 3 weeks.", metric: "Corridor cluster", peerComparison: "Regional norm: 1.2 works per block." },
       { type: "pattern", severity: "moderate", title: "Fiscal Year-End Clustering", summary: "All sanctions approved in final week of March.", metric: "March 20–28", peerComparison: "Normal approval spread: 42 days." },
     ],
     peerDistribution: [
@@ -787,7 +1382,7 @@ export const INVESTIGATIONS: Investigation[] = [
     radarMetrics: [
       { dimension: "Cost Deviation", thisWork: 48, peerBaseline: 35 },
       { dimension: "Semantic Overlap", thisWork: 35, peerBaseline: 25 },
-      { dimension: "Spatial Clustering", thisWork: 72, peerBaseline: 30 },
+      { dimension: "Constituency Clust.", thisWork: 72, peerBaseline: 30 },
       { dimension: "Vendor Concentration", thisWork: 50, peerBaseline: 35 },
       { dimension: "Timeline Compression", thisWork: 65, peerBaseline: 40 },
     ],
@@ -798,21 +1393,21 @@ export const INVESTIGATIONS: Investigation[] = [
     riskScore: 81,
     status: "Escalated",
     assignedTo: "District Vigilance Cell",
-    primarySignal: "Exact co-location with Jal Jeevan Mission asset",
+    primarySignal: "Co-location with Jal Jeevan Mission asset",
     notes: [
       { id: "n2", timestamp: "2026-09-04T14:00:00", author: "Vigilance Officer R. Singh", content: "Field team dispatched. Preliminary report expected within 7 working days." },
     ],
     evidence: [
-      { id: "e5", type: "comparison", title: "Cross-Scheme Co-location", description: "GPS overlap within 18m of operational JJM water ATM installed 2022.", addedAt: "2026-08-28T16:30:00", addedBy: "System" },
+      { id: "e5", type: "comparison", title: "Cross-Scheme Co-location", description: "Identical site location with operational JJM water ATM installed 2022.", addedAt: "2026-08-28T16:30:00", addedBy: "System" },
     ],
     timeline: [
-      { id: "t9", timestamp: "2026-08-28T16:30:00", actor: "ArthaSentinel V2.4", actorType: "system", action: "Anomaly detected", object: "MPL-55301", result: "Cross-scheme spatial match with JJM database." },
+      { id: "t9", timestamp: "2026-08-28T16:30:00", actor: "ArthaSentinel V2.4", actorType: "system", action: "Anomaly detected", object: "MPL-55301", result: "Cross-scheme match with JJM database." },
       { id: "t10", timestamp: "2026-09-01T10:00:00", actor: "S. Pillai", actorType: "investigator", action: "Case triaged", object: "INV-004", result: "Priority: High. Cross-scheme overlap confirmed." },
       { id: "t11", timestamp: "2026-09-03T11:30:00", actor: "Dr. K. S. Ramanathan", actorType: "supervisor", action: "Case escalated", object: "INV-004", result: "Referred to District Vigilance Cell." },
       { id: "t12", timestamp: "2026-09-04T14:00:00", actor: "R. Singh (DVC)", actorType: "investigator", action: "Evidence added", object: "INV-004", result: "Field inspection order issued." },
     ],
     anomalyFlags: [
-      { type: "semantic", severity: "critical", title: "Exact Asset Co-location", summary: "GPS coordinates overlap within 18m of operational central scheme water ATM.", metric: "18m overlap", peerComparison: "Potential duplicate asset on identical parcel." },
+      { type: "semantic", severity: "critical", title: "Asset Co-location", summary: "Identical site location with operational central scheme water ATM.", metric: "Co-location", peerComparison: "Potential duplicate asset on identical parcel." },
       { type: "cost", severity: "elevated", title: "Drilling Depth Discrepancy", summary: "Quoted 350ft in alluvial basin where aquifer documented at 140ft.", metric: "+74% vs norm", peerComparison: "CGWB baseline: 140–160ft." },
     ],
     peerDistribution: [
@@ -826,7 +1421,7 @@ export const INVESTIGATIONS: Investigation[] = [
     radarMetrics: [
       { dimension: "Cost Deviation", thisWork: 81, peerBaseline: 25 },
       { dimension: "Semantic Overlap", thisWork: 93, peerBaseline: 18 },
-      { dimension: "Spatial Clustering", thisWork: 88, peerBaseline: 22 },
+      { dimension: "Constituency Clust.", thisWork: 88, peerBaseline: 22 },
       { dimension: "Vendor Concentration", thisWork: 60, peerBaseline: 30 },
       { dimension: "Timeline Compression", thisWork: 62, peerBaseline: 38 },
     ],
@@ -860,7 +1455,7 @@ export const INVESTIGATIONS: Investigation[] = [
     radarMetrics: [
       { dimension: "Cost Deviation", thisWork: 88, peerBaseline: 28 },
       { dimension: "Semantic Overlap", thisWork: 91, peerBaseline: 20 },
-      { dimension: "Spatial Clustering", thisWork: 62, peerBaseline: 25 },
+      { dimension: "Constituency Clust.", thisWork: 62, peerBaseline: 25 },
       { dimension: "Vendor Concentration", thisWork: 70, peerBaseline: 30 },
       { dimension: "Timeline Compression", thisWork: 75, peerBaseline: 35 },
     ],
@@ -895,7 +1490,7 @@ export const INVESTIGATIONS: Investigation[] = [
     radarMetrics: [
       { dimension: "Cost Deviation", thisWork: 78, peerBaseline: 28 },
       { dimension: "Semantic Overlap", thisWork: 42, peerBaseline: 22 },
-      { dimension: "Spatial Clustering", thisWork: 65, peerBaseline: 30 },
+      { dimension: "Constituency Clust.", thisWork: 65, peerBaseline: 30 },
       { dimension: "Vendor Concentration", thisWork: 82, peerBaseline: 35 },
       { dimension: "Timeline Compression", thisWork: 50, peerBaseline: 40 },
     ],
@@ -912,15 +1507,6 @@ export const RELATED_WORKS: RelatedWork[] = [
   { workId: "MPL-63218", relatedWorkId: "MPL-2023-0491", similarityScore: 0.91, distance: 280, categoryMatch: true, costDifference: 2000000, relatedDescription: "RO Desalination Unit, Nagapattinam Coastal Taluk", relatedConstituency: "Nagapattinam Parliamentary", relatedAmount: 3400000, relationshipType: "semantic" },
 ];
 
-// ─── Map Clusters ────────────────────────────────────────────────────────────
-
-export const MAP_CLUSTERS: MapCluster[] = [
-  { id: "CL-01", centerLat: 23.195, centerLng: 77.083, workIds: ["MPL-48291", "MPL-38192", "MPL-92104"], totalWorks: 7, flaggedCost: 4, highlySimilar: 2, underInvestigation: 1, label: "Bhopal–Sehore Cluster" },
-  { id: "CL-02", centerLat: 25.32, centerLng: 82.97, workIds: ["MPL-55301"], totalWorks: 3, flaggedCost: 1, highlySimilar: 1, underInvestigation: 1, label: "Varanasi Cross-Scheme Zone" },
-  { id: "CL-03", centerLat: 22.72, centerLng: 75.86, workIds: ["MPL-91024"], totalWorks: 4, flaggedCost: 2, highlySimilar: 0, underInvestigation: 0, label: "Indore Solar Lighting Cluster" },
-  { id: "CL-04", centerLat: 26.99, centerLng: 75.85, workIds: ["MPL-72819"], totalWorks: 5, flaggedCost: 3, highlySimilar: 0, underInvestigation: 0, label: "Jaipur Road Works Corridor" },
-];
-
 // ─── All Audit Events (chronological, system-wide) ───────────────────────────
 
 export const ALL_AUDIT_EVENTS: AuditEvent[] = [
@@ -932,6 +1518,6 @@ export const ALL_AUDIT_EVENTS: AuditEvent[] = [
 export const VALIDATION_METRICS = [
   { model: "Cost Outlier Detector (Robust Z / MAD)", precision: 0.912, recall: 0.884, f1Score: 0.898, benchmarkCases: 1450, lastCalibrated: "2026-08-15" },
   { model: "Semantic Text & DPR Overlap (Embeddings + Cosine)", precision: 0.945, recall: 0.862, f1Score: 0.902, benchmarkCases: 820, lastCalibrated: "2026-08-20" },
-  { model: "Spatial Clustering & Asset Co-location (DBSCAN)", precision: 0.887, recall: 0.921, f1Score: 0.904, benchmarkCases: 640, lastCalibrated: "2026-08-28" },
+  { model: "Constituency & Vendor Monopolies (Clustering)", precision: 0.887, recall: 0.921, f1Score: 0.904, benchmarkCases: 640, lastCalibrated: "2026-08-28" },
   { model: "Tender Splitting & Fiscal Clustering", precision: 0.864, recall: 0.890, f1Score: 0.877, benchmarkCases: 1100, lastCalibrated: "2026-09-01" },
 ];

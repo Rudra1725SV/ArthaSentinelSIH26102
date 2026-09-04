@@ -60,7 +60,7 @@ export default function InvestigationDetailPage() {
     radarMetrics: [
       { dimension: "Cost Deviation", thisWork: Math.min(work.deviationPercentage, 95), peerBaseline: 25 },
       { dimension: "Semantic Overlap", thisWork: work.anomalyTypes.includes("semantic") ? 80 : 20, peerBaseline: 20 },
-      { dimension: "Spatial Clustering", thisWork: work.anomalyTypes.includes("geographic") ? 75 : 25, peerBaseline: 25 },
+      { dimension: "Constituency Clust.", thisWork: work.anomalyTypes.includes("geographic") ? 75 : 25, peerBaseline: 25 },
       { dimension: "Vendor Concentration", thisWork: 50, peerBaseline: 35 },
       { dimension: "Timeline Compression", thisWork: 45, peerBaseline: 40 },
     ],
@@ -126,6 +126,24 @@ export default function InvestigationDetailPage() {
             <p className="font-sans text-sm text-slate-600">
               {work.constituency} · {work.district}, {work.state} · Financial Year: <span className="font-data font-semibold text-slate-800">{work.financialYear}</span>
             </p>
+
+            <div className="font-sans text-xs text-slate-600 flex items-center gap-2 pt-1">
+              <span>Sponsoring MP:</span>
+              {work.mp_id ? (
+                <Link
+                  href={`/mps/${work.mp_id}`}
+                  className="font-semibold text-blue-700 hover:text-blue-900 hover:underline inline-flex items-center gap-1.5 bg-blue-50/80 px-2.5 py-1 rounded-lg border border-blue-200"
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-3.5 h-3.5" strokeWidth="2">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                    <circle cx="12" cy="7" r="4" />
+                  </svg>
+                  {work.mp_name} (Inspect Parliamentary Dossier &rarr;)
+                </Link>
+              ) : (
+                <span className="font-medium text-slate-700">{work.mp_name || "Unassigned"}</span>
+              )}
+            </div>
           </div>
 
           {/* Risk Gauge */}

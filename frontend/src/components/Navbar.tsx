@@ -3,6 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { SEED_MPS, WORKS, SYSTEM_STATS } from "@/lib/mock-data";
 
 const NAV_TABS = [
   {
@@ -31,7 +32,7 @@ const NAV_TABS = [
     href: "/investigations",
     label: "Investigations",
     desc: "Case Triage Queue",
-    badge: "14 Flagged",
+    badge: `${SYSTEM_STATS.flaggedWorks} Flagged`,
     icon: (
       <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
         <path fillRule="evenodd" d="M3 6a3 3 0 013-3h10a1 1 0 01.8 1.6L14.25 8l2.55 3.4A1 1 0 0116 13H6a1 1 0 00-1 1v3a1 1 0 11-2 0V6z" clipRule="evenodd" />
@@ -42,7 +43,7 @@ const NAV_TABS = [
     href: "/works",
     label: "Work Explorer",
     desc: "Project Registry",
-    badge: "10,482",
+    badge: `${SYSTEM_STATS.totalWorks}`,
     icon: (
       <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
         <path d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zM2 11a2 2 0 012-2h12a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4z" />
@@ -50,13 +51,13 @@ const NAV_TABS = [
     ),
   },
   {
-    href: "/map",
-    label: "Geospatial Map",
-    desc: "Spatial Clusters & GIS",
-    badge: "GIS",
+    href: "/mps",
+    label: "Browse MPs",
+    desc: "Representatives Explorer",
+    badge: `${SYSTEM_STATS.totalMPs}`,
     icon: (
       <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
-        <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
+        <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
       </svg>
     ),
   },
@@ -136,7 +137,7 @@ export function Navbar() {
 
           {/* Quick Metrics Pill */}
           <div className="hidden lg:flex items-center gap-2 text-xs font-data text-slate-600 bg-slate-100/80 px-3 py-1.5 rounded-lg border border-slate-200/60">
-            <span className="font-semibold text-slate-900">12,48,320</span> works indexed
+            <span className="font-semibold text-slate-900">{SEED_MPS.length}</span> MPs · <span className="font-semibold text-slate-900">{WORKS.length}</span> Works (Seed Data)
           </div>
 
           {/* Auditor Profile Pill */}
