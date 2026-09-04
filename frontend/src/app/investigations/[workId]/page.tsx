@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { DashboardLayout } from "@/components/AppSidebar";
-import { WORKS, getInvestigationByWorkId, getRelatedWorks, formatCurrency, formatCurrencyFull, getRiskTier } from "@/lib/mock-data";
+import { WORKS, getInvestigationByWorkId, getRelatedWorks, formatCurrency, formatCurrencyFull, getRiskTier, formatTimestamp } from "@/lib/mock-data";
 import type { AnomalyFlag, Investigation, RelatedWork, AuditEvent } from "@/lib/mock-data";
 import { RiskBadge } from "@/components/RiskBadge";
 
@@ -368,7 +368,7 @@ export default function InvestigationDetailPage() {
                   <div className="flex items-center gap-2 font-data text-xs text-slate-500 mb-1.5">
                     <span className="font-semibold text-slate-700">{n.author}</span>
                     <span>·</span>
-                    <span>{new Date(n.timestamp).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}</span>
+                    <span suppressHydrationWarning>{formatTimestamp(n.timestamp)}</span>
                   </div>
                   <p className="text-slate-800 leading-relaxed">{n.content}</p>
                 </div>
@@ -412,8 +412,8 @@ export default function InvestigationDetailPage() {
                 <div className="flex-1 space-y-1">
                   <div className="font-sans text-sm font-bold text-slate-900">{evt.action}</div>
                   <div className="font-sans text-xs text-slate-600">{evt.result}</div>
-                  <div className="font-data text-[11px] text-slate-400 pt-0.5">
-                    {evt.actor} · {new Date(evt.timestamp).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}
+                  <div className="font-data text-[11px] text-slate-400 pt-0.5" suppressHydrationWarning>
+                    {evt.actor} · {formatTimestamp(evt.timestamp)}
                   </div>
                 </div>
               </div>

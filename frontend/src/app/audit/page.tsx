@@ -3,7 +3,7 @@
 import React, { useState, useMemo } from "react";
 import Link from "next/link";
 import { DashboardLayout } from "@/components/AppSidebar";
-import { ALL_AUDIT_EVENTS } from "@/lib/mock-data";
+import { ALL_AUDIT_EVENTS, formatTimestamp } from "@/lib/mock-data";
 
 export default function AuditTrailPage() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -103,18 +103,10 @@ export default function AuditTrailPage() {
 
                     <p className="font-sans text-xs sm:text-sm text-slate-600 leading-relaxed">{evt.result}</p>
 
-                    <div className="font-data text-[11px] text-slate-400 pt-1">
+                    <div className="font-data text-[11px] text-slate-400 pt-1" suppressHydrationWarning>
                       <span>{evt.actor}</span>
                       <span className="mx-2">·</span>
-                      <span>
-                        {new Date(evt.timestamp).toLocaleDateString("en-IN", {
-                          day: "numeric",
-                          month: "short",
-                          year: "numeric",
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
-                      </span>
+                      <span>{formatTimestamp(evt.timestamp)}</span>
                     </div>
                   </div>
                 </div>

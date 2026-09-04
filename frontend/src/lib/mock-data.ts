@@ -121,6 +121,21 @@ export function formatCurrencyFull(val: number): string {
   return "₹" + val.toLocaleString("en-IN");
 }
 
+export function formatTimestamp(iso: string): string {
+  if (!iso) return "";
+  try {
+    const parts = iso.split("T");
+    const datePart = parts[0];
+    const timePart = parts[1] ? parts[1].slice(0, 5) : "";
+    const [y, m, d] = datePart.split("-");
+    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const monthName = months[parseInt(m, 10) - 1] || m;
+    return `${parseInt(d, 10)} ${monthName} ${y}${timePart ? `, ${timePart}` : ""}`;
+  } catch {
+    return iso;
+  }
+}
+
 export function getRiskTier(score: number): Work["riskTier"] {
   if (score >= 80) return "Critical";
   if (score >= 60) return "Elevated";

@@ -50,9 +50,13 @@ export default function RootLayout({
   return (
     <html
       lang="en"
+      suppressHydrationWarning
       className={`${inter.variable} ${poppins.variable} ${montserrat.variable} ${roboto.variable} ${newsreader.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col font-sans bg-[#FAF9F5] text-slate-900 selection:bg-blue-100 selection:text-blue-900">
+      <body
+        suppressHydrationWarning
+        className="min-h-full flex flex-col font-sans bg-[#FAF9F5] text-slate-900 selection:bg-blue-100 selection:text-blue-900"
+      >
         {children}
       </body>
     </html>
