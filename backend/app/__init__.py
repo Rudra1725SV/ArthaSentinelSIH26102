@@ -1,0 +1,1 @@
+"""ArthaSentinel FastAPI application package."""

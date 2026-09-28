@@ -104,36 +104,36 @@ export default function MPDetailPage() {
     <DashboardLayout>
       <div className="space-y-10">
         {/* Breadcrumb Navigation */}
-        <div className="flex items-center gap-2 text-xs font-sans text-slate-500">
+        <div className="flex items-center gap-2 text-sm font-sans text-slate-500">
           <Link href="/mps" className="hover:text-blue-800 transition-colors">
             MP Intelligence
           </Link>
           <span>/</span>
           <span className="font-semibold text-slate-900">{mp.name}</span>
           <span className="text-slate-300">|</span>
-          <span className="font-data text-slate-400">ID: {mp.mp_id}</span>
+          <span className="font-data text-slate-500">ID: {mp.mp_id}</span>
         </div>
 
         {/* ─── Parliamentary Dossier Header (Open Institutional Surface) ─── */}
         <div className="flex flex-col md:flex-row md:items-start justify-between gap-6 pb-6 border-b border-slate-200">
           <div className="flex items-start gap-4">
-            <div className="w-14 h-14 rounded-2xl bg-blue-900 text-white font-emphasis text-lg font-bold flex items-center justify-center shrink-0 shadow-xs">
+            <div className="w-14 h-14 rounded-2xl bg-blue-900 text-white font-emphasis text-xl font-bold flex items-center justify-center shrink-0 shadow-xs">
               {initials}
             </div>
             <div className="space-y-1.5">
               <div className="flex items-center gap-2.5 flex-wrap">
-                <h1 className="font-heading text-2xl sm:text-3xl font-bold tracking-tight text-slate-950">
+                <h1 className="font-heading text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-slate-950">
                   {mp.name}
                 </h1>
-                <span className="px-2 py-0.5 rounded bg-slate-100 font-sans text-xs font-semibold text-slate-700">
+                <span className="px-2.5 py-1 rounded bg-slate-100 font-sans text-xs sm:text-sm font-semibold text-slate-700">
                   {mp.party}
                 </span>
-                <span className="px-2 py-0.5 rounded bg-blue-50 font-sans text-xs font-semibold text-blue-800 border border-blue-100">
+                <span className="px-2.5 py-1 rounded bg-blue-50 font-sans text-xs sm:text-sm font-semibold text-blue-800 border border-blue-100">
                   {mp.house}
                 </span>
               </div>
 
-              <div className="font-sans text-xs sm:text-sm text-slate-600 flex flex-wrap items-center gap-x-3 gap-y-1">
+              <div className="font-sans text-sm text-slate-600 flex flex-wrap items-center gap-x-3 gap-y-1">
                 <span>Constituency: <strong className="font-semibold text-slate-900">{mp.constituency}</strong></span>
                 <span>•</span>
                 <span>District: <strong className="font-semibold text-slate-900">{mp.district}</strong></span>
@@ -147,12 +147,12 @@ export default function MPDetailPage() {
 
           {/* Composite Risk Summary */}
           <div className="flex md:flex-col md:items-end gap-2 shrink-0">
-            <span className="font-emphasis text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+            <span className="font-emphasis text-xs font-bold text-slate-500 uppercase tracking-wider">
               PORTFOLIO RISK INDEX
             </span>
             <RiskBadge score={mp.risk_score} tier={riskTier} showScore={true} className="text-sm py-1 px-3" />
-            <div className="font-data text-xs text-slate-500">
-              <strong className="text-slate-800">{mp.anomaly_rate}%</strong> of works flagged for review
+            <div className="font-data text-sm text-slate-600">
+              <strong className="text-slate-900 font-semibold">{mp.anomaly_rate}%</strong> of works flagged for review
             </div>
           </div>
         </div>
@@ -161,14 +161,14 @@ export default function MPDetailPage() {
         <div className="space-y-4 pt-2">
           <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-2">
             <div>
-              <h2 className="font-heading text-lg font-bold text-slate-900">
+              <h2 className="font-heading text-xl font-bold text-slate-900">
                 Statutory Fund Velocity &amp; Utilization
               </h2>
-              <p className="font-sans text-xs text-slate-500">
+              <p className="font-sans text-sm text-slate-500">
                 Recorded cumulative expenditure measured against statutory 5-year MPLADS entitlement
               </p>
             </div>
-            <div className="font-data text-xs space-x-3 text-slate-600">
+            <div className="font-data text-sm space-x-3 text-slate-700">
               <span>Spent: <strong className="text-slate-950 font-bold">{formatCurrency(mp.recorded_expenditure)}</strong></span>
               <span>/</span>
               <span>Allocated: <strong className="text-slate-950 font-bold">{formatCurrency(mp.allocated_amount)}</strong></span>
@@ -176,7 +176,7 @@ export default function MPDetailPage() {
             </div>
           </div>
 
-          <div className="w-full bg-slate-100 rounded-full h-3 overflow-hidden">
+          <div className="w-full bg-slate-100 rounded-full h-3.5 overflow-hidden">
             <div
               className={`h-full rounded-full transition-all duration-500 ${
                 mp.utilization_rate > 90
@@ -190,22 +190,22 @@ export default function MPDetailPage() {
           </div>
 
           {/* Compact Inline Scrutiny Summary */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-3 text-xs font-sans text-slate-600 border-t border-slate-100">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-3 text-sm font-sans text-slate-600 border-t border-slate-100">
             <div>
               <div className="font-semibold text-slate-900 mb-0.5">Sanctioned Works Breakdown</div>
-              <p className="text-slate-500 leading-relaxed font-data">
+              <p className="text-slate-600 leading-relaxed font-data">
                 {mp.works_count} total works · {mp.completed_works} completed · {mp.ongoing_works} ongoing execution.
               </p>
             </div>
             <div>
               <div className="font-semibold text-slate-900 mb-0.5">Scrutiny Signals</div>
-              <p className="text-slate-500 leading-relaxed">
+              <p className="text-slate-600 leading-relaxed">
                 {mp.flagged_works} works flagged for review ({mp.high_risk_works} in high/critical attention tiers).
               </p>
             </div>
             <div>
               <div className="font-semibold text-slate-900 mb-0.5">Ethical Investigation Charter</div>
-              <p className="text-slate-500 leading-relaxed">
+              <p className="text-slate-600 leading-relaxed">
                 Flags indicate statistical deviations against peer baselines, not findings of wrongdoing.
               </p>
             </div>
@@ -216,40 +216,26 @@ export default function MPDetailPage() {
         <div className="space-y-4 pt-6 border-t border-slate-200">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
             <div>
-              <h2 className="font-heading text-xl font-bold text-slate-950">
+              <h2 className="font-heading text-2xl font-bold text-slate-950">
                 Associated Works Portfolio ({works.length})
               </h2>
-              <p className="font-sans text-xs text-slate-500 mt-0.5">
-                All sanctioned infrastructure projects associated with {mp.name} in the active dataset
+              <p className="font-sans text-sm text-slate-600">
+                Individual sanctioned schemes sponsored by this representative across all project categories
               </p>
             </div>
 
-            {/* Filter toolbar */}
-            <div className="flex flex-wrap items-center gap-3">
-              <div className="relative min-w-[220px]">
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
-                  strokeWidth="2"
-                >
-                  <circle cx="11" cy="11" r="8" />
-                  <line x1="21" y1="21" x2="16.65" y2="16.65" />
-                </svg>
-                <input
-                  type="text"
-                  placeholder="Filter works..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-9 pr-3 py-1.5 font-sans text-xs bg-white border border-slate-200 rounded-xl focus:outline-hidden focus:ring-2 focus:ring-blue-600"
-                />
-              </div>
-
+            <div className="flex items-center gap-3">
+              <input
+                type="text"
+                placeholder="Search works..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="bg-white border border-slate-200 rounded-xl px-3.5 py-2 font-sans text-sm text-slate-800 placeholder-slate-400 focus:outline-hidden focus:ring-2 focus:ring-blue-600"
+              />
               <select
                 value={riskFilter}
                 onChange={(e) => setRiskFilter(e.target.value)}
-                className="bg-white border border-slate-200 rounded-xl px-3 py-1.5 font-sans text-xs font-semibold text-slate-700"
+                className="bg-white border border-slate-200 rounded-xl px-3.5 py-2 font-sans text-sm font-semibold text-slate-700"
               >
                 <option value="ALL">All Risk Tiers</option>
                 <option value="CRITICAL">Critical Flag</option>
@@ -261,14 +247,14 @@ export default function MPDetailPage() {
           </div>
 
           {filteredWorks.length === 0 ? (
-            <div className="rounded-2xl border border-slate-200 bg-white p-8 text-center text-xs font-sans text-slate-500">
+            <div className="rounded-2xl border border-slate-200 bg-white p-8 text-center text-sm font-sans text-slate-500">
               No projects match the active filter criteria.
             </div>
           ) : (
             <div className="rounded-2xl border border-slate-200 bg-white shadow-2xs overflow-hidden">
               <div className="overflow-x-auto">
-                <table className="w-full text-left font-data text-xs sm:text-sm">
-                  <thead className="bg-[#F8F7F2] border-b border-slate-200 text-xs font-sans font-bold text-slate-700 uppercase tracking-wider">
+                <table className="w-full text-left font-data text-sm sm:text-base">
+                  <thead className="bg-[#F8F7F2] border-b border-slate-200 text-xs sm:text-[13px] font-sans font-bold text-slate-700 uppercase tracking-wider">
                     <tr>
                       <th className="py-3.5 pl-6 pr-3">Work ID</th>
                       <th className="px-3 py-3.5">Description</th>
@@ -285,28 +271,28 @@ export default function MPDetailPage() {
                       const tier = getRiskTier(w.riskScore);
                       return (
                         <tr key={w.workId} className="hover:bg-slate-50/70 transition-colors">
-                          <td className="py-3.5 pl-6 pr-3 font-bold text-blue-800">
+                          <td className="py-4 pl-6 pr-3 font-bold text-blue-800">
                             <Link href={`/investigations/${w.workId}`} className="hover:underline">
                               {w.workId}
                             </Link>
                           </td>
-                          <td className="px-3 py-3.5 max-w-[280px]">
-                            <div className="font-sans text-xs font-semibold text-slate-900 line-clamp-1">
+                          <td className="px-3 py-4 max-w-[280px]">
+                            <div className="font-sans text-sm sm:text-base font-semibold text-slate-900 line-clamp-1">
                               {w.description}
                             </div>
-                            <div className="font-sans text-[11px] text-slate-500 mt-0.5">
+                            <div className="font-sans text-xs sm:text-sm text-slate-500 mt-0.5">
                               {w.implementingAgency}
                             </div>
                           </td>
-                          <td className="px-3 py-3.5">
-                            <span className="font-sans text-xs text-slate-700">
+                          <td className="px-3 py-4">
+                            <span className="font-sans text-sm text-slate-700">
                               {w.category}
                             </span>
                           </td>
-                          <td className="px-3 py-3.5 font-bold text-slate-900">
+                          <td className="px-3 py-4 font-bold text-slate-900">
                             {formatCurrency(w.sanctionedAmount)}
                           </td>
-                          <td className="px-3 py-3.5 text-xs text-slate-500">
+                          <td className="px-3 py-4 text-sm text-slate-600">
                             {formatCurrency(w.peerMedian)}
                             {w.deviationPercentage !== 0 && (
                               <span
@@ -318,18 +304,18 @@ export default function MPDetailPage() {
                               </span>
                             )}
                           </td>
-                          <td className="px-3 py-3.5">
+                          <td className="px-3 py-4">
                             <RiskBadge score={w.riskScore} tier={tier} showScore={true} />
                           </td>
-                          <td className="px-3 py-3.5">
-                            <span className="font-sans text-xs font-medium text-slate-700">
+                          <td className="px-3 py-4">
+                            <span className="font-sans text-sm font-medium text-slate-700">
                               {w.status}
                             </span>
                           </td>
-                          <td className="py-3.5 pr-6 text-right">
+                          <td className="py-4 pr-6 text-right">
                             <Link
                               href={`/investigations/${w.workId}`}
-                              className="font-sans text-xs font-semibold text-blue-700 hover:text-blue-900 hover:underline"
+                              className="font-sans text-xs sm:text-sm font-bold text-blue-700 hover:text-blue-900 hover:underline"
                             >
                               Inspect &rarr;
                             </Link>

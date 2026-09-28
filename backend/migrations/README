@@ -1,0 +1,3 @@
+Run from backend/ after setting DATABASE_URL or all POSTGRES_* variables:
+
+    alembic upgrade head

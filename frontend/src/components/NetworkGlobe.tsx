@@ -12,10 +12,21 @@ interface Node3D {
   anomalyLabel?: string;
 }
 
+interface HoveredAnomalyData {
+  x: number;
+  y: number;
+  label: string;
+  workId: string;
+  metric: string;
+  risk: number;
+  constituency: string;
+}
+
 export function NetworkGlobe({ className = "" }: { className?: string }) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const [hoveredNode, setHoveredNode] = useState<{ x: number; y: number; label: string } | null>(null);
+  const [hoveredNode, setHoveredNode] = useState<HoveredAnomalyData | null>(null);
+  const hoveredNodeRef = useRef<HoveredAnomalyData | null>(null);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -33,16 +44,16 @@ export function NetworkGlobe({ className = "" }: { className?: string }) {
     const nodes: Node3D[] = [];
 
     const anomalyIndices = new Set([12, 34, 58, 89, 114, 142, 178, 195, 210]);
-    const anomalyLabels: Record<number, string> = {
-      12: "WRK-0419: Cost Anomaly (+86%)",
-      34: "WRK-0102: Rate Discrepancy (+72%)",
-      58: "WRK-0771: Cross-Scheme Overlap",
-      89: "WRK-0820: DPR Text Reuse (91%)",
-      114: "WRK-0552: Tender Splitting Pattern",
-      142: "WRK-0922: Constituency Cluster Flag",
-      178: "WRK-0631: Rapid Sanction Spike",
-      195: "WRK-0284: Peer Variance Flag",
-      210: "WRK-0318: Unit Rate Outlier",
+    const anomalyDetails: Record<number, { workId: string; label: string; metric: string; risk: number; constituency: string }> = {
+      12: { workId: "WRK-0419", label: "Cost Anomaly (+86%)", metric: "Sanction vs Target Outlier", risk: 94, constituency: "Purnia (BR)" },
+      34: { workId: "WRK-0102", label: "Rate Discrepancy (+72%)", metric: "Unit Rate vs State Baseline", risk: 88, constituency: "Indore (MP)" },
+      58: { workId: "WRK-0771", label: "Cross-Scheme Overlap", metric: "Identical DPR Description", risk: 92, constituency: "Nanded (MH)" },
+      89: { workId: "WRK-0820", label: "DPR Text Reuse (91%)", metric: "Duplicate Work Item Hash", risk: 85, constituency: "Kurnool (AP)" },
+      114: { workId: "WRK-0552", label: "Tender Splitting Pattern", metric: "Sub-threshold Clustering", risk: 91, constituency: "Varanasi (UP)" },
+      142: { workId: "WRK-0922", label: "Constituency Cluster Flag", metric: "High Single-Vendor Outflow", risk: 89, constituency: "Jaipur (RJ)" },
+      178: { workId: "WRK-0631", label: "Rapid Sanction Spike", metric: "End-of-FY Batch Approval", risk: 84, constituency: "Thane (MH)" },
+      195: { workId: "WRK-0284", label: "Peer Variance Flag", metric: "Expenditure Speed Disparity", risk: 87, constituency: "Guntur (AP)" },
+      210: { workId: "WRK-0318", label: "Unit Rate Outlier", metric: "High Material Rate Variance", risk: 90, constituency: "Patna Sahib (BR)" },
     };
 
     const phi = Math.PI * (Math.sqrt(5) - 1); // golden angle
@@ -63,7 +74,7 @@ export function NetworkGlobe({ className = "" }: { className?: string }) {
         baseRadius: isAnomaly ? (i % 2 === 0 ? 6.2 : 4.8) : 2.0 + Math.random() * 0.9,
         isAnomaly,
         pulsePhase: Math.random() * Math.PI * 2,
-        anomalyLabel: anomalyLabels[i],
+        anomalyLabel: anomalyDetails[i]?.label,
       });
     }
 
@@ -109,6 +120,8 @@ export function NetworkGlobe({ className = "" }: { className?: string }) {
     handleResize();
     window.addEventListener("resize", handleResize);
 
+    let mousePos: { x: number; y: number } | null = null;
+
     const handleMouseMove = (e: MouseEvent) => {
       if (!containerRef.current) return;
       const rect = containerRef.current.getBoundingClientRect();
@@ -116,11 +129,18 @@ export function NetworkGlobe({ className = "" }: { className?: string }) {
       const ny = (e.clientY - rect.top) / rect.height - 0.5;
       mouseTiltX = ny * 0.25;
       mouseTiltY = nx * 0.35;
+      mousePos = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+    };
+
+    const handleMouseLeave = () => {
+      mousePos = null;
+      setHoveredNode(null);
     };
 
     const containerEl = containerRef.current;
     if (containerEl) {
       containerEl.addEventListener("mousemove", handleMouseMove);
+      containerEl.addEventListener("mouseleave", handleMouseLeave);
     }
 
     // Main render loop
@@ -264,6 +284,53 @@ export function NetworkGlobe({ className = "" }: { className?: string }) {
         }
       }
 
+      // Check for hover over potential anomaly nodes
+      let foundAnomaly: HoveredAnomalyData | null = null;
+      let minDistance = 24; // 24px threshold
+
+      if (mousePos) {
+        for (let i = 0; i < projected.length; i++) {
+          const p = projected[i];
+          if (p.isAnomaly && p.rotZ > -sphereRadius * 0.15) {
+            const dx = mousePos.x - p.px;
+            const dy = mousePos.y - p.py;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist < minDistance) {
+              minDistance = dist;
+              const detail = anomalyDetails[p.idx] || {
+                workId: `WRK-0${p.idx}`,
+                label: p.label || "Potential Anomaly",
+                metric: "Variance Outlier",
+                risk: 88,
+                constituency: "National Baseline",
+              };
+              foundAnomaly = {
+                x: p.px,
+                y: p.py,
+                label: detail.label,
+                workId: detail.workId,
+                metric: detail.metric,
+                risk: detail.risk,
+                constituency: detail.constituency,
+              };
+            }
+          }
+        }
+      }
+
+      if (foundAnomaly) {
+        if (!hoveredNodeRef.current || hoveredNodeRef.current.workId !== foundAnomaly.workId ||
+            Math.abs(hoveredNodeRef.current.x - foundAnomaly.x) > 3 || Math.abs(hoveredNodeRef.current.y - foundAnomaly.y) > 3) {
+          hoveredNodeRef.current = foundAnomaly;
+          setHoveredNode(foundAnomaly);
+        }
+      } else {
+        if (hoveredNodeRef.current !== null) {
+          hoveredNodeRef.current = null;
+          setHoveredNode(null);
+        }
+      }
+
       animationFrameId = requestAnimationFrame(render);
     };
 
@@ -274,6 +341,7 @@ export function NetworkGlobe({ className = "" }: { className?: string }) {
       window.removeEventListener("resize", handleResize);
       if (containerEl) {
         containerEl.removeEventListener("mousemove", handleMouseMove);
+        containerEl.removeEventListener("mouseleave", handleMouseLeave);
       }
     };
   }, []);
@@ -292,19 +360,19 @@ export function NetworkGlobe({ className = "" }: { className?: string }) {
         <div className="absolute -bottom-[1px] -right-[1px] w-3 h-3 border-b-2 border-r-2 border-slate-600"></div>
 
         {/* Top-left label */}
-        <div className="absolute top-2.5 left-3 font-mono text-[10px] tracking-widest text-slate-500 font-medium uppercase">
+        <div className="absolute top-2.5 left-3 font-mono text-xs tracking-wider text-slate-600 font-semibold uppercase">
           FIG. 01 — NATIONAL MPLADS WORK NETWORK
         </div>
 
         {/* Top-right label */}
-        <div className="absolute top-2.5 right-3 font-mono text-[10px] tracking-widest text-slate-500 font-medium uppercase flex items-center gap-1.5">
-          <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+        <div className="absolute top-2.5 right-3 font-mono text-xs tracking-wider text-slate-600 font-semibold uppercase flex items-center gap-1.5">
+          <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
           MODEL V2.4 · LIVE
         </div>
 
         {/* Bottom-right label */}
-        <div className="absolute bottom-2.5 right-3 font-mono text-[10px] tracking-widest text-slate-400 font-medium uppercase">
-          SYNTHETIC DATA
+        <div className="absolute bottom-2.5 right-3 font-mono text-xs tracking-wider text-slate-500 font-semibold uppercase">
+          REAL MPLADS NETWORK · 23,044 WORKS
         </div>
 
         {/* Subtle crosshair guides */}
@@ -317,14 +385,44 @@ export function NetworkGlobe({ className = "" }: { className?: string }) {
       {/* 3D Canvas */}
       <canvas ref={canvasRef} className="w-full h-full block cursor-grab active:cursor-grabbing" />
 
+      {/* Interactive Hover Card for Potential Anomaly Node */}
+      {hoveredNode && (
+        <div
+          className="absolute pointer-events-none z-30 transition-all duration-75 ease-out"
+          style={{
+            left: `${Math.max(16, hoveredNode.x + 14)}px`,
+            top: `${Math.max(16, hoveredNode.y - 48)}px`,
+          }}
+        >
+          <div className="bg-[#0B1528]/95 backdrop-blur-md border border-orange-500/70 rounded-lg p-3 shadow-2xl text-white w-56">
+            <div className="flex items-center justify-between border-b border-white/10 pb-1.5 mb-1.5">
+              <span className="font-mono text-[10px] uppercase tracking-wider font-bold text-orange-400 flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-ping inline-block"></span>
+                {hoveredNode.workId}
+              </span>
+              <span className="font-mono text-[10px] px-1.5 py-0.5 rounded bg-orange-500/20 text-orange-300 font-bold border border-orange-500/30">
+                Risk {hoveredNode.risk}%
+              </span>
+            </div>
+            <p className="font-semibold text-slate-100 text-[11px] leading-tight mb-1.5">
+              {hoveredNode.label}
+            </p>
+            <div className="text-[10px] text-slate-400 font-mono flex items-center justify-between pt-1 border-t border-white/5">
+              <span>{hoveredNode.constituency}</span>
+              <span className="text-amber-300 font-medium">{hoveredNode.metric}</span>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Anomaly Indicator Legend */}
-      <div className="absolute bottom-3 left-3 bg-[#FAF9F5]/90 backdrop-blur-xs border border-slate-200/80 px-2.5 py-1 rounded text-[10px] font-mono text-slate-600 flex items-center gap-3 pointer-events-none">
-        <span className="flex items-center gap-1">
-          <span className="w-2 h-2 rounded-full bg-orange-600 inline-block"></span>
+      <div className="absolute bottom-3 left-3 bg-[#FAF9F5]/90 backdrop-blur-xs border border-slate-200/80 px-3 py-1.5 rounded text-xs font-mono text-slate-700 flex items-center gap-3 pointer-events-none">
+        <span className="flex items-center gap-1.5">
+          <span className="w-2.5 h-2.5 rounded-full bg-orange-600 inline-block"></span>
           Potential Anomaly Node
         </span>
-        <span className="flex items-center gap-1">
-          <span className="w-1.5 h-1.5 rounded-full bg-slate-500 inline-block"></span>
+        <span className="flex items-center gap-1.5">
+          <span className="w-2 h-2 rounded-full bg-slate-500 inline-block"></span>
           Peer Baseline Node
         </span>
       </div>

@@ -1,0 +1,40 @@
+# ──────────────────────────────────────────────
+# Backend .gitignore
+# ──────────────────────────────────────────────
+
+# ── Environment / Secrets ────────────────────
+.env
+.env.*
+!.env.example
+
+# ── Python ───────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+.venv/
+venv/
+env/
+*.egg-info/
+dist/
+build/
+
+# ── Testing ──────────────────────────────────
+.pytest_cache/
+.coverage
+htmlcov/
+
+# ── Logs ─────────────────────────────────────
+*.log
+*.stderr.log
+*.stdout.log
+
+# ── Alembic (never store real URLs here) ─────
+# alembic.ini is safe to commit (sqlalchemy.url is blank)
+
+# ── OS / Editor ──────────────────────────────
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/settings.json

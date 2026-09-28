@@ -35,6 +35,7 @@ export interface MP {
 // ─── Work Entity ─────────────────────────────────────────────────────────────
 
 export interface Work {
+  id?: string;
   workId: string;
   mp_id: string;
   mp_name: string;
@@ -119,7 +120,7 @@ export interface AuditEvent {
   id: string;
   timestamp: string;
   actor: string;
-  actorType: "system" | "investigator" | "supervisor";
+  actorType: "system" | "investigator" | "supervisor" | "validator";
   action: string;
   object: string;
   result: string;
@@ -177,13 +178,16 @@ export function calculateDatasetMetrics(mps: MP[], works: Work[]): DatasetMetric
 
 // ─── Format Helpers ──────────────────────────────────────────────────────────
 
-export function formatCurrency(val: number): string {
-  if (val >= 10000000) return "₹" + (val / 10000000).toFixed(2) + " Cr";
-  return "₹" + (val / 100000).toFixed(1) + "L";
+export function formatCurrency(val: number | null | undefined): string {
+  if (val === null || val === undefined || isNaN(Number(val))) return "₹0.0L";
+  const num = Number(val);
+  if (num >= 10000000) return "₹" + (num / 10000000).toFixed(2) + " Cr";
+  return "₹" + (num / 100000).toFixed(1) + "L";
 }
 
-export function formatCurrencyFull(val: number): string {
-  return "₹" + val.toLocaleString("en-IN");
+export function formatCurrencyFull(val: number | null | undefined): string {
+  if (val === null || val === undefined || isNaN(Number(val))) return "₹0";
+  return "₹" + Number(val).toLocaleString("en-IN");
 }
 
 export function formatTimestamp(iso: string): string {

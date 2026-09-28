@@ -27,7 +27,7 @@ export function AnomalyTypeBadge({ type, className = "" }: AnomalyTypeBadgeProps
 
   return (
     <span
-      className={`inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium border ${meta.bg} ${className}`}
+      className={`inline-flex items-center px-2.5 py-1 rounded text-xs sm:text-sm font-semibold border ${meta.bg} ${className}`}
     >
       {meta.label}
     </span>

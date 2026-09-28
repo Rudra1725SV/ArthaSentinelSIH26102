@@ -56,12 +56,12 @@ export function RiskBadge({ score, tier, showScore = true, className = "" }: Ris
 
   return (
     <span
-      className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-xs font-medium border ${current.bg} ${current.border} ${current.text} ${className}`}
+      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs sm:text-sm font-semibold border ${current.bg} ${current.border} ${current.text} ${className}`}
     >
-      <span className={`w-1.5 h-1.5 rounded-full ${current.dot}`}></span>
+      <span className={`w-2 h-2 rounded-full ${current.dot}`}></span>
       <span>{current.label}</span>
       {showScore && score !== undefined && (
-        <span className="font-mono text-[11px] opacity-80">({score.toFixed(2)})</span>
+        <span className="font-mono text-xs sm:text-sm opacity-85">({score.toFixed(2)})</span>
       )}
     </span>
   );

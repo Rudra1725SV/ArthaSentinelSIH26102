@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { DashboardLayout } from "@/components/AppSidebar";
@@ -13,17 +13,47 @@ import {
   getRiskTier,
   formatTimestamp,
   Investigation,
+  Work,
 } from "@/lib/mock-data";
 import { RiskBadge } from "@/components/RiskBadge";
+import { getWorkDetail } from "@/lib/api";
 
 export default function InvestigationDetailPage() {
   const { workId } = useParams<{ workId: string }>();
-  const work = WORKS.find((w) => w.workId === workId);
+  const [work, setWork] = useState<Work | null>(() => WORKS.find((w) => w.workId === workId) || null);
+  const [loading, setLoading] = useState(!work);
+
+  useEffect(() => {
+    let mounted = true;
+    if (workId) {
+      getWorkDetail(workId).then((res) => {
+        if (mounted && res) {
+          setWork(res);
+          setLoading(false);
+        }
+      }).catch(() => {
+        if (mounted) setLoading(false);
+      });
+    }
+    return () => { mounted = false; };
+  }, [workId]);
+
   const investigation = work ? getInvestigationByWorkId(work.workId) : undefined;
   const relatedWorks = work ? getRelatedWorks(work.workId) : [];
 
   const [newNote, setNewNote] = useState("");
   const [actionNotice, setActionNotice] = useState<string | null>(null);
+
+  if (loading) {
+    return (
+      <DashboardLayout>
+        <div className="py-24 text-center max-w-lg mx-auto font-sans">
+          <div className="inline-block w-8 h-8 border-4 border-blue-800 border-t-transparent rounded-full animate-spin mb-4" />
+          <p className="text-slate-600 text-sm font-medium">Loading investigation file for Work #{workId}...</p>
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   if (!work) {
     return (
@@ -169,12 +199,12 @@ export default function InvestigationDetailPage() {
 
             {/* Composite Risk Score Badge */}
             <div className="flex lg:flex-col items-center lg:items-end justify-between lg:justify-start gap-2 bg-slate-50 lg:bg-transparent p-4 lg:p-0 rounded-2xl shrink-0">
-              <span className="font-emphasis text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+              <span className="font-emphasis text-xs font-bold text-slate-500 uppercase tracking-wider">
                 COMPOSITE RISK INDEX
               </span>
               <div className="flex items-baseline gap-1">
-                <span className="font-emphasis text-4xl font-extrabold text-orange-700">{work.riskScore}</span>
-                <span className="font-data text-xs text-slate-400 font-semibold">/ 100</span>
+                <span className="font-emphasis text-4xl sm:text-5xl font-extrabold text-orange-700">{work.riskScore}</span>
+                <span className="font-data text-sm text-slate-400 font-semibold">/ 100</span>
               </div>
               <RiskBadge score={work.riskScore} tier={getRiskTier(work.riskScore)} showScore={false} />
             </div>
@@ -183,31 +213,33 @@ export default function InvestigationDetailPage() {
           {/* Compact Inline Analytical Facts (Unboxed) */}
           <div className="grid grid-cols-2 sm:grid-cols-5 gap-6 pt-4 border-t border-slate-100">
             <div>
-              <div className="font-emphasis text-[10px] font-bold tracking-wider text-slate-500 uppercase">Sanctioned Cost</div>
-              <div className="font-data text-xl sm:text-2xl font-bold text-slate-950 mt-0.5">{formatCurrency(work.sanctionedAmount)}</div>
-              <div className="font-data text-[11px] text-slate-400">{formatCurrencyFull(work.sanctionedAmount)}</div>
+              <div className="font-emphasis text-xs font-bold tracking-wider text-slate-500 uppercase">Sanctioned Cost</div>
+              <div className="font-data text-2xl sm:text-3xl font-bold text-slate-950 mt-0.5">{formatCurrency(work.sanctionedAmount)}</div>
+              <div className="font-data text-xs sm:text-sm text-slate-500">{formatCurrencyFull(work.sanctionedAmount)}</div>
             </div>
             <div>
-              <div className="font-emphasis text-[10px] font-bold tracking-wider text-slate-500 uppercase">Peer Median Cost</div>
-              <div className="font-data text-xl sm:text-2xl font-bold text-slate-800 mt-0.5">{formatCurrency(work.peerMedian)}</div>
-              <div className="font-sans text-[11px] text-slate-400">Baseline in cohort</div>
+              <div className="font-emphasis text-xs font-bold tracking-wider text-slate-500 uppercase">Peer Median Cost</div>
+              <div className="font-data text-2xl sm:text-3xl font-bold text-slate-800 mt-0.5">{formatCurrency(work.peerMedian)}</div>
+              <div className="font-sans text-xs sm:text-sm text-slate-500">Baseline in cohort</div>
             </div>
             <div>
-              <div className="font-emphasis text-[10px] font-bold tracking-wider text-slate-500 uppercase">Unit Cost Deviation</div>
-              <div className={`font-data text-xl sm:text-2xl font-bold mt-0.5 ${work.deviationPercentage > 50 ? "text-orange-700" : "text-slate-800"}`}>
-                +{work.deviationPercentage}%
+              <div className="font-emphasis text-xs font-bold tracking-wider text-slate-500 uppercase">Unit Cost Deviation</div>
+              <div className={`font-data text-2xl sm:text-3xl font-bold mt-0.5 ${Math.abs(work.deviationPercentage) > 50 ? "text-orange-700" : "text-slate-800"}`}>
+                {work.deviationPercentage > 0 ? `+${Number(work.deviationPercentage).toFixed(1)}%` : `${Number(work.deviationPercentage).toFixed(1)}%`}
               </div>
-              <div className="font-sans text-[11px] text-slate-400">Above peer median</div>
+              <div className="font-sans text-xs sm:text-sm text-slate-500">
+                {work.deviationPercentage >= 0 ? "Above peer median" : "Below peer median"}
+              </div>
             </div>
             <div>
-              <div className="font-emphasis text-[10px] font-bold tracking-wider text-slate-500 uppercase">Peer Cohort Sample</div>
-              <div className="font-data text-xl sm:text-2xl font-bold text-slate-800 mt-0.5">{work.peerCount}</div>
-              <div className="font-sans text-[11px] text-slate-400">Comparable projects</div>
+              <div className="font-emphasis text-xs font-bold tracking-wider text-slate-500 uppercase">Peer Cohort Sample</div>
+              <div className="font-data text-2xl sm:text-3xl font-bold text-slate-800 mt-0.5">{work.peerCount}</div>
+              <div className="font-sans text-xs sm:text-sm text-slate-500">Comparable projects</div>
             </div>
             <div>
-              <div className="font-emphasis text-[10px] font-bold tracking-wider text-slate-500 uppercase">Cost Percentile</div>
-              <div className="font-data text-xl sm:text-2xl font-bold text-orange-700 mt-0.5">&gt;95th</div>
-              <div className="font-sans text-[11px] text-slate-400">Severe outlier band</div>
+              <div className="font-emphasis text-xs font-bold tracking-wider text-slate-500 uppercase">Cost Percentile</div>
+              <div className="font-data text-2xl sm:text-3xl font-bold text-orange-700 mt-0.5">&gt;95th</div>
+              <div className="font-sans text-xs sm:text-sm text-slate-500">Severe outlier band</div>
             </div>
           </div>
         </div>
@@ -255,14 +287,14 @@ export default function InvestigationDetailPage() {
                           fill={p.isThisWork ? "#EA580C" : "#CBD5E1"}
                           className="transition-all"
                         />
-                        <text x={x + barWidth / 2} y={y - 8} textAnchor="middle" className="text-[10px] fill-slate-800 font-data font-bold">
+                        <text x={x + barWidth / 2} y={y - 8} textAnchor="middle" className="text-xs fill-slate-800 font-data font-bold">
                           {formatCurrency(p.amount)}
                         </text>
                         <text
                           x={x + barWidth / 2}
                           y={barH + 28}
                           textAnchor="middle"
-                          className={`text-[10px] font-data font-semibold ${p.isThisWork ? "fill-orange-700 font-bold" : "fill-slate-500"}`}
+                          className={`text-xs font-data font-semibold ${p.isThisWork ? "fill-orange-700 font-bold" : "fill-slate-600"}`}
                         >
                           {p.label}
                         </text>
@@ -272,7 +304,7 @@ export default function InvestigationDetailPage() {
                 </svg>
               </div>
 
-              <div className="flex items-center justify-between pt-3 border-t border-slate-100 text-xs font-sans text-slate-500">
+              <div className="flex items-center justify-between pt-3 border-t border-slate-100 text-sm font-sans text-slate-600">
                 <span>Interquartile Dispersion: P25–P75 Band</span>
                 <span className="font-data">Peer Median: {formatCurrency(work.peerMedian)}</span>
               </div>
@@ -282,8 +314,8 @@ export default function InvestigationDetailPage() {
             <div className="lg:col-span-5 rounded-2xl border border-slate-200 bg-white p-6 sm:p-7 shadow-2xs space-y-4 flex flex-col justify-between">
               <div>
                 <div className="flex items-center justify-between pb-2 border-b border-slate-100">
-                  <span className="font-heading text-base font-bold text-slate-900">Multi-Signal Risk Radar</span>
-                  <span className="font-emphasis text-[10px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded">
+                  <span className="font-heading text-lg font-bold text-slate-950">Multi-Signal Risk Radar</span>
+                  <span className="font-emphasis text-xs font-bold text-slate-600 bg-slate-100 px-2.5 py-1 rounded">
                     5 SIGNALS
                   </span>
                 </div>
@@ -335,14 +367,14 @@ export default function InvestigationDetailPage() {
         {/* ─── SECTION 3: STRUCTURED INVESTIGATIVE EVIDENCE DOSSIER (NARRATIVE) ─── */}
         <div className="space-y-6 pt-6 border-t border-slate-200">
           <div>
-            <div className="font-emphasis text-[11px] font-bold tracking-wider text-orange-700 uppercase flex items-center gap-2">
+            <div className="font-emphasis text-xs sm:text-sm font-bold tracking-wider text-orange-700 uppercase flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-orange-600"></span>
               INVESTIGATIVE EVIDENCE DOSSIER · AUDIT REASONING
             </div>
-            <h2 className="font-heading text-xl sm:text-2xl font-bold text-slate-950 mt-1">
+            <h2 className="font-heading text-2xl sm:text-3xl font-bold text-slate-950 mt-1">
               Why was this flagged for review?
             </h2>
-            <p className="font-sans text-sm text-slate-600 max-w-3xl mt-1 leading-relaxed">
+            <p className="font-sans text-sm sm:text-base text-slate-600 max-w-3xl mt-1 leading-relaxed">
               This project triggered multi-signal anomaly thresholds during automated cohort analysis. Flags do not represent findings of impropriety, but mandate human reviewer due diligence.
             </p>
           </div>
@@ -352,16 +384,16 @@ export default function InvestigationDetailPage() {
             {inv.anomalyFlags.map((flag, i) => (
               <div
                 key={i}
-                className="p-6 rounded-2xl border border-slate-200/90 bg-white shadow-2xs space-y-3"
+                className="p-6 sm:p-7 rounded-2xl border border-slate-200/90 bg-white shadow-2xs space-y-3"
               >
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-slate-100">
-                  <div className="flex items-center gap-2">
-                    <span className="font-emphasis text-[10px] font-bold text-blue-800 bg-blue-50 px-2 py-0.5 rounded uppercase">
+                  <div className="flex items-center gap-2.5">
+                    <span className="font-emphasis text-xs font-bold text-blue-800 bg-blue-50 px-2.5 py-1 rounded uppercase">
                       SIGNAL {String(i + 1).padStart(2, "0")} · {flag.type.toUpperCase()}
                     </span>
-                    <h3 className="font-heading text-base font-bold text-slate-900">{flag.title}</h3>
+                    <h3 className="font-heading text-lg font-bold text-slate-900">{flag.title}</h3>
                   </div>
-                  <span className={`font-data text-xs font-bold px-2 py-0.5 rounded self-start sm:self-auto ${
+                  <span className={`font-data text-xs sm:text-sm font-bold px-2.5 py-1 rounded self-start sm:self-auto ${
                     flag.severity === "critical" ? "bg-red-50 text-red-800 border border-red-200" :
                     flag.severity === "elevated" ? "bg-orange-50 text-orange-800 border border-orange-200" :
                     "bg-slate-100 text-slate-700"
@@ -370,14 +402,14 @@ export default function InvestigationDetailPage() {
                   </span>
                 </div>
 
-                <p className="font-sans text-sm text-slate-700 leading-relaxed">
+                <p className="font-sans text-sm sm:text-base text-slate-700 leading-relaxed">
                   {flag.summary}
                 </p>
 
-                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs font-data bg-slate-50 p-3 rounded-xl border border-slate-100">
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs sm:text-sm font-data bg-slate-50 p-3.5 rounded-xl border border-slate-100">
                   <span className="text-orange-800 font-bold">Observed Metric: {flag.metric}</span>
                   <span className="text-slate-300">•</span>
-                  <span className="text-slate-600">Calibrated Baseline: {flag.peerComparison}</span>
+                  <span className="text-slate-700 font-medium">Calibrated Baseline: {flag.peerComparison}</span>
                 </div>
               </div>
             ))}
@@ -388,18 +420,18 @@ export default function InvestigationDetailPage() {
         {relatedWorks.length > 0 && (
           <div className="space-y-4 pt-6 border-t border-slate-200">
             <div>
-              <h2 className="font-heading text-xl font-bold text-slate-950">
+              <h2 className="font-heading text-2xl font-bold text-slate-950">
                 Potentially Related Works ({relatedWorks.length})
               </h2>
-              <p className="font-sans text-xs text-slate-500">
+              <p className="font-sans text-sm text-slate-600">
                 Projects identified via text similarity or identical administrative asset parcels (Zero GIS/distance reliance)
               </p>
             </div>
 
             <div className="rounded-2xl border border-slate-200 bg-white shadow-2xs overflow-hidden">
               <div className="overflow-x-auto">
-                <table className="w-full text-left font-data text-xs sm:text-sm">
-                  <thead className="bg-[#F8F7F2] border-b border-slate-200 text-xs font-sans font-bold text-slate-700 uppercase tracking-wider">
+                <table className="w-full text-left font-data text-sm sm:text-base">
+                  <thead className="bg-[#F8F7F2] border-b border-slate-200 text-xs sm:text-[13px] font-sans font-bold text-slate-700 uppercase tracking-wider">
                     <tr>
                       <th className="py-3.5 pl-6 pr-3">Related Work ID</th>
                       <th className="px-3 py-3.5">Description</th>
@@ -412,30 +444,30 @@ export default function InvestigationDetailPage() {
                   <tbody className="divide-y divide-slate-100">
                     {relatedWorks.map((rw) => (
                       <tr key={rw.relatedWorkId} className="hover:bg-slate-50/70 transition-colors">
-                        <td className="py-3.5 pl-6 pr-3 font-bold text-blue-800">
+                        <td className="py-4 pl-6 pr-3 font-bold text-blue-800">
                           {rw.relatedWorkId}
                         </td>
-                        <td className="px-3 py-3.5 max-w-sm">
-                          <div className="font-sans text-xs font-semibold text-slate-900 line-clamp-1">{rw.relatedDescription}</div>
-                          <div className="font-sans text-[11px] text-slate-500 mt-0.5">{rw.relatedConstituency}</div>
+                        <td className="px-3 py-4 max-w-sm">
+                          <div className="font-sans text-sm sm:text-base font-semibold text-slate-900 line-clamp-1">{rw.relatedDescription}</div>
+                          <div className="font-sans text-xs sm:text-sm text-slate-500 mt-0.5">{rw.relatedConstituency}</div>
                         </td>
-                        <td className="px-3 py-3.5">
-                          <span className="px-2 py-0.5 rounded bg-slate-100 font-sans text-xs text-slate-700">
+                        <td className="px-3 py-4">
+                          <span className="px-2.5 py-1 rounded bg-slate-100 font-sans text-xs sm:text-sm font-semibold text-slate-700">
                             {rw.administrativeOverlap}
                           </span>
                         </td>
-                        <td className="px-3 py-3.5 font-bold text-slate-900">
+                        <td className="px-3 py-4 font-bold text-slate-900">
                           {formatCurrency(rw.relatedAmount)}
                         </td>
-                        <td className="px-3 py-3.5 text-center">
-                          <span className="font-emphasis font-bold text-orange-700 text-xs">
+                        <td className="px-3 py-4 text-center">
+                          <span className="font-emphasis font-bold text-orange-700 text-sm sm:text-base">
                             {(rw.similarityScore * 100).toFixed(0)}%
                           </span>
                         </td>
-                        <td className="py-3.5 pr-6 text-right">
+                        <td className="py-4 pr-6 text-right">
                           <Link
                             href={`/investigations/${rw.relatedWorkId}`}
-                            className="font-sans text-xs font-semibold text-blue-700 hover:text-blue-900 hover:underline"
+                            className="font-sans text-xs sm:text-sm font-bold text-blue-700 hover:text-blue-900 hover:underline"
                           >
                             Compare &rarr;
                           </Link>
@@ -491,20 +523,20 @@ export default function InvestigationDetailPage() {
 
           {/* Chronological Audit Events for this Work */}
           <div className="space-y-3 pt-2">
-            <h3 className="font-heading text-sm font-bold text-slate-900 uppercase tracking-wider">
+            <h3 className="font-heading text-base font-bold text-slate-900 uppercase tracking-wider">
               Chronological Audit Trail
             </h3>
             <div className="space-y-0">
               {inv.timeline.map((evt, idx) => (
-                <div key={evt.id || idx} className="flex gap-4 py-3 border-l-2 border-slate-200 pl-5 ml-2 relative">
-                  <div className="absolute -left-[5px] top-[18px] w-2 h-2 rounded-full bg-blue-600"></div>
-                  <div className="space-y-0.5 text-xs font-sans">
-                    <div className="flex items-center gap-2">
-                      <strong className="text-slate-900">{evt.action}</strong>
-                      <span className="text-slate-400 font-data">{formatTimestamp(evt.timestamp)}</span>
-                      <span className="px-1.5 py-0.2 rounded bg-slate-100 font-data text-[10px] text-slate-600 uppercase">{evt.actorType}</span>
+                <div key={evt.id || idx} className="flex gap-4 py-3.5 border-l-2 border-slate-200 pl-5 ml-2 relative">
+                  <div className="absolute -left-[5px] top-[18px] w-2.5 h-2.5 rounded-full bg-blue-600"></div>
+                  <div className="space-y-1 text-sm font-sans">
+                    <div className="flex items-center gap-2.5 flex-wrap">
+                      <strong className="text-slate-900 font-semibold">{evt.action}</strong>
+                      <span className="text-slate-400 font-data text-xs">{formatTimestamp(evt.timestamp)}</span>
+                      <span className="px-2 py-0.5 rounded bg-slate-100 font-data text-xs text-slate-700 uppercase font-semibold">{evt.actorType}</span>
                     </div>
-                    <p className="text-slate-600">{evt.result}</p>
+                    <p className="text-slate-600 leading-relaxed">{evt.result}</p>
                   </div>
                 </div>
               ))}
